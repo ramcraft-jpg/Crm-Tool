@@ -132,10 +132,51 @@ export default function Dashboard({ onOpenModal }) {
   const convertedPct = Math.round((leadStatus.converted / total) * 100);
 
   const statCards = [
-    { icon: "🎯", value: stats.totalLeads, label: "Total Leads" },
-    { icon: "📁", value: stats.totalProjects, label: "Total Projects" },
-    { icon: "✅", value: stats.totalTasks, label: "Total Tasks" },
-    { icon: "📅", value: stats.totalEvents, label: "Total Events" },
+    { 
+      icon: (
+        // Dashboard (Leads) SVG
+        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="4" y="8" width="5" height="10" rx="2"/>
+          <rect x="13" y="4" width="5" height="14" rx="2"/>
+        </svg>
+      ),
+      value: stats.totalLeads, 
+      label: "Total Leads" 
+    },
+    { 
+      icon: (
+        // Projects SVG
+        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3.5" y="6" width="15" height="10" rx="2"/>
+          <path d="M7 10h2v2H7zM13 10h2v2h-2z" fill="#2563eb"/>
+        </svg>
+      ),
+      value: stats.totalProjects,
+      label: "Total Projects"
+    },
+    { 
+      icon: (
+        // Tasks SVG
+        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="4" y="4" width="14" height="14" rx="3"/>
+          <path d="M8 11.5l2.2 2 3.7-4" />
+        </svg>
+      ),
+      value: stats.totalTasks,
+      label: "Total Tasks"
+    },
+    { 
+      icon: (
+        // Events SVG
+        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3.5" y="5.5" width="15" height="13" rx="3"/>
+          <path d="M7 3v3M15 3v3"/>
+          <path d="M3.5 9.5h15"/>
+        </svg>
+      ),
+      value: stats.totalEvents,
+      label: "Total Events"
+    },
   ];
 
   if (loading) {

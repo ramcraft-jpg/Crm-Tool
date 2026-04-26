@@ -113,30 +113,6 @@ export default function Navbar({ activePage, onNavigate }) {
           />
         </div>
 
-        {/* Notification */}
-        <div
-          style={{
-            position: "relative",
-            fontSize: "22px",
-            cursor: "pointer",
-          }}
-        >
-          🔔
-
-          <div
-            style={{
-              position: "absolute",
-              top: "2px",
-              right: "-1px",
-              width: "8px",
-              
-              height: "8px",
-              background: "#ef4444",
-              borderRadius: "50%",
-            }}
-          />
-        </div>
-
         {/* Profile Avatar */}
         <div
           onClick={() => onNavigate("profile")}

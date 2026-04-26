@@ -1,11 +1,19 @@
 import { useAuth } from '../context/AuthContext';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function Profile() {
-  const { leads, projects, tasks, showToast } = useAuth();
+// Use localStorage key
+const PROFILE_STORAGE_KEY = "nexus_crm_profile_v1";
 
-  // Profile state (simulate fetching from user or backend here)
-  const [profile, setProfile] = useState({
+function getStoredProfile() {
+  const stored = localStorage.getItem(PROFILE_STORAGE_KEY);
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch {
+      // fallback to default
+    }
+  }
+  return {
     firstName: "Arjun",
     lastName: "Kumar",
     email: "admin@nexus.com",
@@ -16,7 +24,24 @@ export default function Profile() {
     memberSince: "Jan 2024",
     lastLogin: "Today",
     role: "Admin",
-  });
+  };
+}
+
+export default function Profile() {
+  const { leads, projects, tasks, showToast } = useAuth();
+
+  // Read profile state from storage
+  const [profile, setProfile] = useState(getStoredProfile);
+
+  // Save profile to localStorage whenever profile changes
+  useEffect(() => {
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  }, [profile]);
+
+  // (optional) set form with storage profile on mount in case user is coming from navigation
+  useEffect(() => {
+    setProfile(getStoredProfile());
+  }, []); // fires only once
 
   // For controlled inputs
   const handleChange = (e) => {
@@ -27,12 +52,11 @@ export default function Profile() {
     }));
   };
 
-  // Simulate save handler (could be replaced with API call)
+  // Save handler: profile already saved in effect, just show toast
   const handleSave = (e) => {
     e.preventDefault();
-    // Save logic (call API and setProfile with response)
+    // localStorage save already happens via effect
     showToast('Profile saved!', 'success');
-    // Here, profile state is already updated with current form values
   };
 
   return (

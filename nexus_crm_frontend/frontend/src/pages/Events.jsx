@@ -3,20 +3,56 @@ import { useAuth } from "../context/AuthContext";
 import EventForm from "../components/EventForm";
 import { StatusBadge } from "../components/Card";
 
-// Add "Deadline" and "Interview" to available event types:
-const EVENT_TYPES = ["Call", "Demo", "Deadline", "Interview"];
+// Add "Deadline" and "Other" to available event types, with "View All" option at the start
+const EVENT_TYPES = ["View All", "Call", "Demo", "Deadline", "Other"];
 
 export default function Events() {
   const { events, setEvents, showToast } = useAuth();
 
+  // Set default filter to "View All"
   const [filter, setFilter] = useState(EVENT_TYPES[0]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
-  // Filter events list (show all if no filter, else by type)
-  const filtered = (Array.isArray(events) ? events : []).filter(
-    (e) => !filter || e.type === filter
-  );
+  // --------- Data Clean-Up Helper ----------
+  // Clean the event type field for display and filtering.
+  // Return exactly "Call", "Demo", "Deadline", "Other" if the event type matches (case-insensitive), including fixing misspellings like 'DeMO', 'demoo', etc.
+  function getCleanType(type) {
+    if (!type) return "—";
+    const norm = type.toString().toLowerCase().trim();
+
+    // Strict match for allowed types
+    if (norm === "call") return "Call";
+    if (
+      norm === "demo" ||
+      norm === "demoo" ||
+      norm === "demonstration" ||
+      norm === "demon" || 
+      norm === "demmo"
+    ) return "Demo";
+    if (
+      norm === "deadline" ||
+      norm === "dead line" ||
+      norm === "due"
+    ) return "Deadline";
+    if (
+      norm === "interview" ||
+      norm === "interviw" ||
+      norm === "interveiw"
+    ) return "Other";
+
+    // fallback
+    return "—";
+  }
+
+  // Filter events list ("View All" shows all, otherwise filter by type using clean type)
+  // REMOVE completed events from the list (i.e. events with status "Completed")
+  const filtered = (Array.isArray(events) ? events : [])
+    .filter((e) => e.status !== "Completed")
+    .filter(
+      (e) =>
+        filter === "View All" || getCleanType(e.type) === filter
+    );
 
   // Open add event modal
   const openAdd = () => {
@@ -38,6 +74,8 @@ export default function Events() {
         ? event.attendees.join(", ")
         : "",
       desc: event.description || "",
+      // Normalize the event type so the form shows the correct value
+      type: getCleanType(event.type),
     });
 
     setModalOpen(true);
@@ -46,6 +84,11 @@ export default function Events() {
   // Save (add or edit) event
   const handleSave = async (form) => {
     try {
+      // Ensure never saving "View All" as a type! Default to "Call" if not a valid event type (enforced by dropdown)
+      const validType = EVENT_TYPES.slice(1).find(
+        (t) => t === form.type
+      ) || EVENT_TYPES[1];
+
       const payload = {
         title: form.title,
         description: form.desc || "",
@@ -57,8 +100,7 @@ export default function Events() {
           form.date && form.time
             ? new Date(`${form.date}T${form.time}`)
             : null,
-        // Allow selecting "Deadline" or "Interview" type
-        type: form.type || EVENT_TYPES[0],
+        type: validType,
         attendees: form.participants
           ? form.participants
               .split(",")
@@ -87,10 +129,7 @@ export default function Events() {
           throw new Error("Failed to update event");
         }
 
-        showToast(
-          "Event updated successfully!",
-          "success"
-        );
+        showToast("Event updated successfully!", "success");
       }
       // Create event
       else {
@@ -240,9 +279,9 @@ export default function Events() {
               ) : (
                 filtered.map((e) => (
                   <tr key={e._id}>
-                    {/* Type (no emoji) */}
+                    {/* Type - Always show the cleaned up type */}
                     <td>
-                      {e.type}
+                      {getCleanType(e.type)}
                     </td>
                     {/* Title */}
                     <td>{e.title || "—"}</td>
@@ -301,8 +340,8 @@ export default function Events() {
         }}
         onSave={handleSave}
         initial={editing}
-        // Pass all event types, now including Deadline and Interview
-        eventTypes={EVENT_TYPES}
+        // Pass all event types, now including Deadline and Other, "View All" is also present but should be skipped in form select
+        eventTypes={EVENT_TYPES.filter(t => t !== "View All")}
       />
     </div>
   );
