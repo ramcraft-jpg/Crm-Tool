@@ -2,6 +2,11 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth, API } from "../context/AuthContext";
 
+// LEAD STATUS COLORS
+const COLOR_NEW = "#2563eb";        // Royal Blue
+const COLOR_CONTACTED = "#A0AEC0";  // Soft Slate
+const COLOR_CONVERTED = "#1e293b";  // Deep Navy
+
 // Helper function to get the start of the current week (Monday)
 const getStartOfWeek = () => {
   const now = new Date();
@@ -135,7 +140,7 @@ export default function Dashboard({ onOpenModal }) {
     { 
       icon: (
         // Dashboard (Leads) SVG
-        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke={COLOR_NEW} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="4" y="8" width="5" height="10" rx="2"/>
           <rect x="13" y="4" width="5" height="14" rx="2"/>
         </svg>
@@ -146,9 +151,9 @@ export default function Dashboard({ onOpenModal }) {
     { 
       icon: (
         // Projects SVG
-        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke={COLOR_NEW} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3.5" y="6" width="15" height="10" rx="2"/>
-          <path d="M7 10h2v2H7zM13 10h2v2h-2z" fill="#2563eb"/>
+          <path d="M7 10h2v2H7zM13 10h2v2h-2z" fill={COLOR_NEW}/>
         </svg>
       ),
       value: stats.totalProjects,
@@ -157,7 +162,7 @@ export default function Dashboard({ onOpenModal }) {
     { 
       icon: (
         // Tasks SVG
-        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke={COLOR_NEW} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="4" y="4" width="14" height="14" rx="3"/>
           <path d="M8 11.5l2.2 2 3.7-4" />
         </svg>
@@ -168,7 +173,7 @@ export default function Dashboard({ onOpenModal }) {
     { 
       icon: (
         // Events SVG
-        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke={COLOR_NEW} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3.5" y="5.5" width="15" height="13" rx="3"/>
           <path d="M7 3v3M15 3v3"/>
           <path d="M3.5 9.5h15"/>
@@ -238,7 +243,7 @@ export default function Dashboard({ onOpenModal }) {
             <div style={{ background: "#fff", borderRadius: "24px", padding: "28px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "30px" }}>
                 <h2>Weekly Activity Overview</h2>
-                <button style={{ background: "#eff6ff", border: "1px solid #bfdbfe", padding: "8px 16px", borderRadius: "10px", color: "#2563eb" }}>
+                <button style={{ background: "#eff6ff", border: `1px solid #bfdbfe`, padding: "8px 16px", borderRadius: "10px", color: COLOR_NEW }}>
                   This Week
                 </button>
               </div>
@@ -253,22 +258,22 @@ export default function Dashboard({ onOpenModal }) {
                   return (
                     <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
                       <div style={{ width: "34px", display: "flex", flexDirection: "column-reverse" }}>
-                        {/* Completed (yellow) - top */}
+                        {/* Completed (Soft Slate) - top */}
                         <div
                           style={{
                             width: "34px",
                             height: `${heightCompleted}px`,
-                            background: "#f59e0b",
+                            background: COLOR_CONTACTED,
                             borderRadius: heightConverted > 0 ? "0 0 0 0" : "8px 8px 0 0",
                             transition: "height 0.3s",
                           }}
                         />
-                        {/* Converted (green) - bottom */}
+                        {/* Converted (Deep Navy) - bottom */}
                         <div
                           style={{
                             width: "34px",
                             height: `${heightConverted}px`,
-                            background: "#10b981",
+                            background: COLOR_CONVERTED,
                             borderRadius: heightCompleted > 0 ? "0 0 8px 8px" : "8px 8px 0 0",
                             transition: "height 0.3s",
                           }}
@@ -276,16 +281,38 @@ export default function Dashboard({ onOpenModal }) {
                       </div>
                       <span>{item.day}</span>
                       <div style={{ fontSize: "11px", color: "#64748b", lineHeight: 1.2, marginTop: "-5px" }}>
-                        <span>🟢{item.converted}</span>{" / "}
-                        <span style={{ color: "#edb31c" }}>🟡{item.completed}</span>
+                        <span style={{ color: COLOR_CONVERTED }}>●{item.converted}</span>{" / "}
+                        <span style={{ color: COLOR_CONTACTED }}>●{item.completed}</span>
                       </div>
                     </div>
                   );
                 })}
               </div>
               <div style={{ marginTop: 16, marginLeft: 8, display: "flex", gap: 14 }}>
-                <span style={{ fontSize: "14px" }}><span style={{ display: "inline-block", verticalAlign: "middle", width: 12, height: 12, background: "#10b981", borderRadius: 3, marginRight: 4 }} />Converted</span>
-                <span style={{ fontSize: "14px" }}><span style={{ display: "inline-block", verticalAlign: "middle", width: 12, height: 12, background: "#f59e0b", borderRadius: 3, marginRight: 4 }} />Completed</span>
+                <span style={{ fontSize: "14px" }}>
+                  <span style={{
+                    display: "inline-block",
+                    verticalAlign: "middle",
+                    width: 12,
+                    height: 12,
+                    background: COLOR_CONVERTED,
+                    borderRadius: 3,
+                    marginRight: 4
+                  }} />
+                  Converted
+                </span>
+                <span style={{ fontSize: "14px" }}>
+                  <span style={{
+                    display: "inline-block",
+                    verticalAlign: "middle",
+                    width: 12,
+                    height: 12,
+                    background: COLOR_CONTACTED,
+                    borderRadius: 3,
+                    marginRight: 4
+                  }} />
+                  Completed
+                </span>
               </div>
             </div>
 
@@ -299,9 +326,9 @@ export default function Dashboard({ onOpenModal }) {
                     height: "140px",
                     borderRadius: "50%",
                     background: `conic-gradient(
-                      #2563eb 0% ${newPct}%,
-                      #10b981 ${newPct}% ${newPct + convertedPct}%,
-                      #f59e0b ${newPct + convertedPct}% 100%
+                      ${COLOR_NEW} 0% ${newPct}%,
+                      ${COLOR_CONVERTED} ${newPct}% ${newPct + convertedPct}%,
+                      ${COLOR_CONTACTED} ${newPct + convertedPct}% 100%
                     )`,
                     position: "relative",
                   }}
@@ -309,9 +336,9 @@ export default function Dashboard({ onOpenModal }) {
                   <div style={{ width: "70px", height: "70px", background: "#fff", borderRadius: "50%", position: "absolute", top: "35px", left: "35px" }} />
                 </div>
                 <div style={{ lineHeight: "2" }}>
-                  <p>🔵 New ({newPct}%) {leadStatus.new}</p>
-                  <p>🟢 Converted ({convertedPct}%) {leadStatus.converted}</p>
-                  <p>🟠 Contacted ({contactedPct}%) {leadStatus.contacted}</p>
+                  <p><span style={{ color: COLOR_NEW }}>●</span> New ({newPct}%) {leadStatus.new}</p>
+                  <p><span style={{ color: COLOR_CONVERTED }}>●</span> Converted ({convertedPct}%) {leadStatus.converted}</p>
+                  <p><span style={{ color: COLOR_CONTACTED }}>●</span> Contacted ({contactedPct}%) {leadStatus.contacted}</p>
                 </div>
               </div>
             </div>
@@ -326,7 +353,7 @@ export default function Dashboard({ onOpenModal }) {
                 <h2>Recent Activity</h2>
                 <button
                   onClick={() => setShowAllActivity(true)}
-                  style={{ background: "#eff6ff", border: "1px solid #bfdbfe", padding: "8px 16px", borderRadius: "10px", color: "#2563eb", cursor: "pointer" }}
+                  style={{ background: "#eff6ff", border: `1px solid #bfdbfe`, padding: "8px 16px", borderRadius: "10px", color: COLOR_NEW, cursor: "pointer" }}
                 >
                   View All
                 </button>
@@ -348,7 +375,7 @@ export default function Dashboard({ onOpenModal }) {
                 <h2>Upcoming Events</h2>
                 <button
                   onClick={() => setShowAllEvents(true)}
-                  style={{ background: "#eff6ff", border: "1px solid #bfdbfe", padding: "8px 16px", borderRadius: "10px", color: "#2563eb", cursor: "pointer" }}
+                  style={{ background: "#eff6ff", border: `1px solid #bfdbfe`, padding: "8px 16px", borderRadius: "10px", color: COLOR_NEW, cursor: "pointer" }}
                 >
                   View All
                 </button>
@@ -381,7 +408,7 @@ export default function Dashboard({ onOpenModal }) {
                 </div>
                 <button
                   onClick={() => setShowAllActivity(false)}
-                  style={{ marginTop: "20px", background: "#2563eb", color: "#fff", border: "none", padding: "12px 24px", borderRadius: "10px", cursor: "pointer" }}
+                  style={{ marginTop: "20px", background: COLOR_NEW, color: "#fff", border: "none", padding: "12px 24px", borderRadius: "10px", cursor: "pointer" }}
                 >
                   Close
                 </button>
@@ -405,7 +432,7 @@ export default function Dashboard({ onOpenModal }) {
                 </div>
                 <button
                   onClick={() => setShowAllEvents(false)}
-                  style={{ marginTop: "20px", background: "#2563eb", color: "#fff", border: "none", padding: "12px 24px", borderRadius: "10px", cursor: "pointer" }}
+                  style={{ marginTop: "20px", background: COLOR_NEW, color: "#fff", border: "none", padding: "12px 24px", borderRadius: "10px", cursor: "pointer" }}
                 >
                   Close
                 </button>
