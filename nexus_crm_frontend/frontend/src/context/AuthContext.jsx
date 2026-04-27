@@ -218,37 +218,7 @@ function RouterFutureWarnings() {
   // Intentionally only shows in dev
   if (import.meta.env.PROD) return null;
   return (
-    <div style={{
-      fontSize: "small",
-      color: "#ad7110",
-      background: "#fff9eb",
-      border: "1px solid #ffe2b4",
-      padding: "8px",
-      marginTop: "24px",
-      marginBottom: "8px",
-      borderRadius: "4px",
-      maxWidth: 680
-    }}>
-      <b>⚠️ React Router v7 Future Flag Warnings:</b>
-      <ul style={{ margin: '0.5em 0', paddingLeft: 24 }}>
-        <li>
-          <strong>startTransition:</strong>{" "}
-          <span>
-            React Router will wrap navigation state updates in <code>React.startTransition</code> in v7.
-            You can opt-in early with the <code>v7_startTransition</code> future flag.<br />
-            See <a href="https://reactrouter.com/v6/upgrading/future#v7_starttransition" target="_blank" rel="noopener noreferrer">docs</a>.
-          </span>
-        </li>
-        <li>
-          <strong>relativeSplatPath:</strong>{" "}
-          <span>
-            Relative route resolution within Splat routes is changing in v7.
-            You can opt-in early with the <code>v7_relativeSplatPath</code> future flag.<br />
-            See <a href="https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath" target="_blank" rel="noopener noreferrer">docs</a>.
-          </span>
-        </li>
-      </ul>
-    </div>
+    <div>.</div>
   );
 }
 

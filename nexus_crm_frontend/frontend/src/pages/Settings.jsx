@@ -24,9 +24,20 @@ export default function Settings() {
       minHeight: "100vh",
     }}>
       <div className="section-header"><div className="section-title">Settings</div></div>
-      <div style={{ maxWidth: 700 }}>
+      <div style={{ maxWidth: 1100 }}>
 
-        <div className="card settings-section">
+        {/* Notification box - increased height, keep required padding top/bottom */}
+        <div
+          className="card settings-section"
+          style={{
+            minHeight: 260, // Make notification block noticeably taller
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            paddingTop: 32,
+            paddingBottom: 32
+          }}
+        >
           <div className="settings-title">Notifications</div>
           {[
             ['Email Notifications', 'Get email alerts for new leads and tasks', true],

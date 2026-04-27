@@ -7,22 +7,18 @@ import { useNavigate } from "react-router-dom";
 
 export default function Leads() {
   const { showToast, authHeader, leads, setLeads, user } = useAuth();
-  const [loading,   setLoading]   = useState(true);
-  const [filter,    setFilter]    = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing,   setEditing]   = useState(null);
+  const [editing, setEditing] = useState(null);
 
   const navigate = useNavigate();
 
-  // Only redirect to login if user/token are missing, but never redirect
-  // to dashboard from here. Stay on leads page after refresh if authenticated.
   useEffect(() => {
     const token = localStorage.getItem("token");
-    // If not authenticated, redirect to login; else, do nothing (stay on leads)
     if (!user && !token) {
       navigate("/login");
     }
-    // Do not navigate anywhere else!
     // eslint-disable-next-line
   }, [user, navigate]);
 
@@ -45,55 +41,76 @@ export default function Leads() {
     // eslint-disable-next-line
   }, []);
 
-  // Filtered list depending on status
   const filtered = leads.filter(
     (l) => filter === "all" || l.status === filter
   );
 
-  // Modal helpers
-  const openAdd  = ()     => { setEditing(null); setModalOpen(true); };
+  const openAdd = () => { setEditing(null); setModalOpen(true); };
   const openEdit = (lead) => { setEditing(lead); setModalOpen(true); };
 
-  // Create lead handler
+  // Workaround for common "500 server error" - ensure fields are handled and send only whitelisted fields
+  const sanitizeLeadForm = (form) => {
+    // Only send form fields the backend expects
+    return {
+      name: form.name?.trim() || "",
+      email: form.email?.trim() || "",
+      phone: form.phone?.trim() || "",
+      company: form.company?.trim() || "",
+      source: form.source?.trim() || "",
+      status: form.status || "New",
+      // Don't send _id or extraneous keys
+    };
+  };
+
+  // Create lead handler with defensive data formatting and error analysis
   const handleCreate = async (form) => {
     try {
-      if (
-        !form.name ||
-        !form.email ||
-        !form.status
-      ) {
+      const sanitized = sanitizeLeadForm(form);
+      if (!sanitized.name || !sanitized.email || !sanitized.status) {
         showToast("Please provide all required lead details.", "danger");
         return;
       }
 
+      // Remove empty fields to avoid backend type errors
+      Object.keys(sanitized).forEach((k) => {
+        if (typeof sanitized[k] === "string" && sanitized[k].trim() === "") {
+          delete sanitized[k];
+        }
+      });
+
       const createRes = await axios.post(
         `${API}/leads`,
-        form,
+        sanitized,
         authHeader()
       );
+
       if (!createRes.data || !createRes.data._id) {
-        throw new Error("No lead was created.");
+        // Edge case: if there's a server error and no _id, show more info
+        throw new Error("Lead was not created. " + (createRes.data?.message || ""));
       }
 
       await fetchLeads();
-
       setModalOpen(false);
       setEditing(null);
 
-      showToast(
-        "Lead added successfully!",
-        "success"
-      );
+      showToast("Lead added successfully!", "success");
     } catch (error) {
       console.error("Create Lead Error:", error);
 
-      if (error.response && error.response.data && error.response.data.message) {
-        showToast(error.response.data.message, "danger");
-      } else {
+      // Improved error visibility for debugging 500 errors
+      if (error.response && error.response.data) {
+        let reason =
+          error.response.data.message ||
+          error.response.data.detail ||
+          JSON.stringify(error.response.data);
         showToast(
-          error.message || "Failed to add lead",
+          "Failed to add lead: " + reason,
           "danger"
         );
+      } else if (error.message) {
+        showToast("Failed to add lead: " + error.message, "danger");
+      } else {
+        showToast("Failed to add lead (unknown error)", "danger");
       }
     }
   };
@@ -106,9 +123,17 @@ export default function Leads() {
         return;
       }
 
+      const sanitized = sanitizeLeadForm(form);
+
+      Object.keys(sanitized).forEach((k) => {
+        if (typeof sanitized[k] === "string" && sanitized[k].trim() === "") {
+          delete sanitized[k];
+        }
+      });
+
       const editRes = await axios.put(
         `${API}/leads/${editing._id}`,
-        form,
+        sanitized,
         authHeader()
       );
       if (!editRes.data || !editRes.data._id) {
@@ -116,14 +141,10 @@ export default function Leads() {
       }
 
       await fetchLeads();
-
       setModalOpen(false);
       setEditing(null);
 
-      showToast(
-        "Lead updated successfully!",
-        "success"
-      );
+      showToast("Lead updated successfully!", "success");
     } catch (error) {
       console.error("Edit Lead Error:", error);
 
@@ -138,14 +159,12 @@ export default function Leads() {
     }
   };
 
-  // Save router
   const handleSave = (form) => (editing ? handleEdit(form) : handleCreate(form));
 
-  // Delete lead handler
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this lead?")) return;
     try {
-      const delRes = await axios.delete(`${API}/leads/${id}`, authHeader());
+      await axios.delete(`${API}/leads/${id}`, authHeader());
       await fetchLeads();
       showToast("Lead deleted successfully!", "success");
     } catch (error) {
@@ -158,10 +177,8 @@ export default function Leads() {
     }
   };
 
-  // Render
   return (
     <div style={{ padding: "30px", background: "#f5f8fc", minHeight: "100vh" }}>
-
       {/* HEADER */}
       <div className="section-header">
         <div className="section-title">Lead Management</div>
@@ -203,7 +220,6 @@ export default function Leads() {
               {filtered.length ? (
                 filtered.map((l) => (
                   <tr key={l._id}>
-
                     {/* NAME */}
                     <td>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -236,10 +252,9 @@ export default function Leads() {
                     <td>
                       <div className="td-actions">
                         <button className="btn btn-outline btn-sm" onClick={() => openEdit(l)}>Edit</button>
-                        <button className="btn btn-danger btn-sm"  onClick={() => handleDelete(l._id)}>Delete</button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(l._id)}>Delete</button>
                       </div>
                     </td>
-
                   </tr>
                 ))
               ) : (

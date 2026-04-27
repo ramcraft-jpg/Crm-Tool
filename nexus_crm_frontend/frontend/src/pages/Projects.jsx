@@ -231,7 +231,7 @@ export default function Projects() {
 
                 <div className="project-meta-row">
                   <div className="project-dates">
-                    📅 Due:{" "}
+                     Due:{" "}
                     {p.endDate
                       ? new Date(p.endDate).toLocaleDateString()
                       : "No deadline"}
@@ -264,7 +264,7 @@ export default function Projects() {
                 color: "var(--text-3)",
               }}
             >
-              <div style={{ fontSize: 40 }}>📂</div>
+              <div style={{ fontSize: 40 }}></div>
               <div style={{ fontSize: 14, marginTop: 12 }}>
                 No projects found.
               </div>
@@ -368,7 +368,7 @@ export default function Projects() {
                 <tr>
                   <td colSpan="7">
                     <div className="empty-state">
-                      <div className="empty-icon">📂</div>
+                      <div className="empty-icon"></div>
                       <div className="empty-text">
                         No projects found.
                       </div>

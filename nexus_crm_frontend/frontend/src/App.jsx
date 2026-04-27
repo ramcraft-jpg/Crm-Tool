@@ -106,8 +106,9 @@ export default function App() {
       style={{
         display: "flex",
         height: "100vh",
-        overflow: "hidden",
+        overflow: "hidden", // Prevent all page scrollbars (no x or y scroll)
         background: "#f5f8fc",
+        width: "100vw", // Ensures no horizontal scrollbars
       }}
     >
       {/* FIXED SIDEBAR */}
@@ -122,6 +123,7 @@ export default function App() {
           background: "#ffffff",
           borderRight: "1px solid #e5e7eb",
           zIndex: 1000,
+          overflow: "hidden", // Prevent scrollbars on sidebar
         }}
       >
         <Sidebar activePage={page} onNavigate={setPage} />
@@ -135,7 +137,8 @@ export default function App() {
           display: "flex",
           flexDirection: "column",
           height: "100vh",
-          overflow: "hidden",
+          overflow: "hidden", // Prevent both x and y scroll on right side except the content area
+          maxWidth: "calc(100vw - 280px)", // Constrain to eliminate side scroll
         }}
       >
         {/* FIXED NAVBAR */}
@@ -146,13 +149,23 @@ export default function App() {
             zIndex: 999,
             background: "#ffffff",
             borderBottom: "1px solid #e5e7eb",
+            overflowX: "hidden",
           }}
         >
           <Navbar activePage={page} onNavigate={setPage} />
         </div>
 
         {/* SCROLLABLE CONTENT */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "0" }}>
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+            padding: "0",
+            maxWidth: "100%",
+            boxSizing: "border-box",
+          }}
+        >
           {renderPage()}
         </div>
       </div>

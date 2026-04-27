@@ -251,7 +251,7 @@ export default function Events() {
       <div className="table-wrap">
         {(Array.isArray(events) && events.length === 0) ? (
           <div className="empty-state">
-            <div className="empty-icon">📅</div>
+            <div className="empty-icon"></div>
             <div className="empty-text">No events found.</div>
           </div>
         ) : (
@@ -271,7 +271,7 @@ export default function Events() {
                 <tr>
                   <td colSpan="6">
                     <div className="empty-state">
-                      <div className="empty-icon">📅</div>
+                      <div className="empty-icon"></div>
                       <div className="empty-text">No events found for this filter.</div>
                     </div>
                   </td>
