@@ -2,6 +2,7 @@
     "name": "crm-root",
     "private": true,
     "scripts": {
+    
       "frontend": "cd nexus_crm_frontend/frontend && npm run dev",
       "backend": "cd nexus_crm_backend && npm start",
       "dev": "concurrently \"npm run backend\" \"npm run frontend\""

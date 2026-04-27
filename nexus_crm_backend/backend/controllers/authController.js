@@ -43,8 +43,19 @@ const registerUser = async (req, res) => {
       res.status(400).json({ message: "Invalid user data. Registration failed." });
     }
   } catch (error) {
+    // Simulate a fetch failure for demonstration
+    if (error.message && error.message.toLowerCase().includes("failed to fetch")) {
+      return res.status(502).json({
+        message: "Could not connect to database or service. (failed to fetch)",
+        error: process.env.NODE_ENV === "development" ? error.message : undefined
+      });
+    }
+    // Include internal error message for API debugging in dev mode only
     console.error("Register Error:", error.message);
-    res.status(500).json({ message: "Server error during registration." });
+    res.status(500).json({
+      message: "Server error during registration.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined
+    });
   }
 };
 
@@ -77,11 +88,23 @@ const loginUser = async (req, res) => {
         token, // Frontend stores this in localStorage
       });
     } else {
+      // For clarity with frontend, status 401 for unauthorized attempts
       res.status(401).json({ message: "Invalid email or password." });
     }
   } catch (error) {
+    // Simulate a fetch failure for demonstration
+    if (error.message && error.message.toLowerCase().includes("failed to fetch")) {
+      return res.status(502).json({
+        message: "Could not connect to database or service. (failed to fetch)",
+        error: process.env.NODE_ENV === "development" ? error.message : undefined
+      });
+    }
+    // Include internal error message for API debugging in dev mode only
     console.error("Login Error:", error.message);
-    res.status(500).json({ message: "Server error during login." });
+    res.status(500).json({
+      message: "Server error during login.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined
+    });
   }
 };
 
@@ -101,8 +124,19 @@ const getMe = async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
+    // Simulate a fetch failure for demonstration
+    if (error.message && error.message.toLowerCase().includes("failed to fetch")) {
+      return res.status(502).json({
+        message: "Could not connect to database or service. (failed to fetch)",
+        error: process.env.NODE_ENV === "development" ? error.message : undefined
+      });
+    }
+    // Include internal error message for API debugging in dev mode only
     console.error("GetMe Error:", error.message);
-    res.status(500).json({ message: "Server error." });
+    res.status(500).json({
+      message: "Server error.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined
+    });
   }
 };
 
