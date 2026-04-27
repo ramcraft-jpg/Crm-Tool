@@ -25,15 +25,16 @@ app.use(
       "http://localhost:5175",
       "http://127.0.0.1:5173",
       "http://127.0.0.1:5174",
+      "http://127.0.0.1:5175",
       "https://your-frontend.vercel.app",
-      "https://crmmain-fawn.vercel.app",
-      "http://127.0.0.1:5175"
+      "https://crmmain-fawn.vercel.app"
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -49,6 +50,17 @@ app.use("/api/profile", require("./routes/profileRoutes"));
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
   res.json({ message: "🚀 Nexus CRM API is running..." });
+});
+
+// ─── Unknown API Route Handler ────────────────────────────────────────────────
+// Ensures all unknown API ("/api/*") paths get a proper 404 JSON response,
+// so the frontend gets structured errors rather than CORS/fetch/anomaly errors.
+// This can help prevent generic fetch/connection errors on wrong routes.
+app.all('/api/*', (req, res) => {
+  res.status(404).json({
+    message: 'API route not found',
+    error: `No matching endpoint for ${req.originalUrl}`,
+  });
 });
 
 // ─── Error Handling Middleware ────────────────────────────────────────────────
