@@ -54,11 +54,11 @@ export default function Sidebar({ activePage, onNavigate }) {
   return (
     <aside
       style={{
-        width: "260px",
+        width: "280px",
         minHeight: "100vh",
-        background: "linear-gradient(134deg, #fff 72%, #f2f6fb 100%)",
-        borderRight: "1px solid #e5e7eb",
-        boxShadow: "2px 0 14px 0 rgba(39, 102, 255, 0.06)",
+      
+       
+        
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
@@ -69,15 +69,19 @@ export default function Sidebar({ activePage, onNavigate }) {
       <div>
         <div
           style={{
-            padding: "32px 26px 20px 26px",
+           
+            padding: "32px 30px 30px 28px",
             borderBottom: "1px solid #f1f5f9",
+            borderRight: "1px solid rgba(37,99,235,0.06)",
             background: "#f4f6fa",
             // removed the dark blue gradient, use light grey
             boxShadow: "0 2px 10px 0 rgba(37,99,235,0.06)",
             borderTopLeftRadius: "0",
-            borderTopRightRadius: "0",
+            borderTopRightRadius: "1",
+    
           }}
         >
+
           <div
             style={{
               fontSize: "27px",
