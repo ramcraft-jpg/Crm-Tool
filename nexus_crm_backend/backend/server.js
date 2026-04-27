@@ -25,6 +25,8 @@ app.use(
       "http://localhost:5175",
       "http://127.0.0.1:5173",
       "http://127.0.0.1:5174",
+      "https://your-frontend.vercel.app",
+      "https://crmmain-fawn.vercel.app",
       "http://127.0.0.1:5175"
     ],
     credentials: true,
@@ -36,13 +38,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
-app.use("/api/auth",      require("./routes/authRoutes"));
+app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
-app.use("/api/leads",     require("./routes/leadRoutes"));
-app.use("/api/projects",  require("./routes/projectRoutes"));
-app.use("/api/tasks",     require("./routes/taskRoutes"));
-app.use("/api/events",    require("./routes/eventRoutes"));
-app.use("/api/profile",   require("./routes/profileRoutes"));
+app.use("/api/leads", require("./routes/leadRoutes"));
+app.use("/api/projects", require("./routes/projectRoutes"));
+app.use("/api/tasks", require("./routes/taskRoutes"));
+app.use("/api/events", require("./routes/eventRoutes"));
+app.use("/api/profile", require("./routes/profileRoutes"));
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
