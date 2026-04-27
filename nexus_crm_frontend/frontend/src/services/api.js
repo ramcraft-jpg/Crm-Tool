@@ -2,7 +2,7 @@
 // Centralized API service layer for backend REST API calls.
 // Includes improved "failed to fetch" error handling for debugging connection issues.
 
-const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, "");
+const BASE_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000/api').replace(/\/$/, "");
 
 async function request(endpoint, options = {}) {
   let response;

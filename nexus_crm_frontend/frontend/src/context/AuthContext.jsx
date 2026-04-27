@@ -8,7 +8,7 @@ import {
 
 // Use a local development API by default but allow .env override
 const getDefaultAPI = () => (
-  import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://localhost:5000/api"
+  import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://127.0.0.1:5000/api"
 );
 export const API = getDefaultAPI();
 
