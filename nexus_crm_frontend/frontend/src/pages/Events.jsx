@@ -3,8 +3,16 @@ import { useAuth } from "../context/AuthContext";
 import EventForm from "../components/EventForm";
 import { StatusBadge } from "../components/Card";
 
-// Add "Deadline" and "Other" to available event types, with "View All" option at the start
-const EVENT_TYPES = ["View All", "Call", "Demo", "Deadline", "Other"];
+// Add "Follow up", "Deadline" and "Other" to available event types, with "View All" option at the start
+const EVENT_TYPES = [
+  "View All",
+  "Call",
+  "Demo",
+  "Meeting",
+  "Follow up",
+  "Deadline",
+  "Other"
+];
 
 export default function Events() {
   const { events, setEvents, showToast } = useAuth();
@@ -16,26 +24,39 @@ export default function Events() {
 
   // --------- Data Clean-Up Helper ----------
   // Clean the event type field for display and filtering.
-  // Return exactly "Call", "Demo", "Deadline", "Other" if the event type matches (case-insensitive), including fixing misspellings like 'DeMO', 'demoo', etc.
+  // Return exactly "Call", "Demo", "Deadline", "Follow up", "Meeting", or "Other" if the event type matches (case-insensitive), including fixing misspellings.
   function getCleanType(type) {
     if (!type) return "—";
     const norm = type.toString().toLowerCase().trim();
 
-    // Strict match for allowed types
+    // Strict match for allowed types + handle common misspellings for "Demo", "Deadline", "Follow up" etc.
     if (norm === "call") return "Call";
     if (
       norm === "demo" ||
       norm === "demoo" ||
       norm === "demonstration" ||
-      norm === "demon" || 
+      norm === "demon" ||
       norm === "demmo"
     ) return "Demo";
+    if (
+      norm === "meeting" ||
+      norm === "meetng" ||
+      norm === "meting"
+    ) return "Meeting";
+    if (
+      norm === "follow up" ||
+      norm === "follow-up" ||
+      norm === "followup" ||
+      norm === "f/up" ||
+      norm === "fup"
+    ) return "Follow up";
     if (
       norm === "deadline" ||
       norm === "dead line" ||
       norm === "due"
     ) return "Deadline";
     if (
+      norm === "other" ||
       norm === "interview" ||
       norm === "interviw" ||
       norm === "interveiw"
@@ -340,7 +361,7 @@ export default function Events() {
         }}
         onSave={handleSave}
         initial={editing}
-        // Pass all event types, now including Deadline and Other, "View All" is also present but should be skipped in form select
+        // Pass all event types, now including "Follow up", "Deadline", and "Other" ("View All" is filtered out)
         eventTypes={EVENT_TYPES.filter(t => t !== "View All")}
       />
     </div>

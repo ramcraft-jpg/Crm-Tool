@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 
+const EVENT_TYPES = ["Call", "Demo", "Deadline", "Follow up", "Meeting", "other"];
+
 const EMPTY = {
   title: "",
   date: "",
@@ -26,7 +28,7 @@ export default function EventForm({
           title: initial.title || "",
           date: initial.date || initial.startDate || "",
           time: initial.time || "",
-          type: initial.type || "Meeting",
+          type: initial.type && EVENT_TYPES.includes(initial.type) ? initial.type : "Meeting",
           // If participants is an array, join with a comma for the input field
           participants: Array.isArray(initial.participants)
             ? initial.participants.join(", ")
@@ -160,16 +162,9 @@ export default function EventForm({
               value={form.type}
               onChange={(e) => set("type", e.target.value)}
             >
-              {[
-                "Meeting",
-                "Call",
-                "Demo",
-                "Follow-up",
-                "Deadline",
-                "Other",
-              ].map((type) => (
+              {EVENT_TYPES.map((type) => (
                 <option key={type} value={type}>
-                  {type}
+                 <Meeting></Meeting>
                 </option>
               ))}
             </select>

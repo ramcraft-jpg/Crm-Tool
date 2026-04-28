@@ -130,32 +130,32 @@ export default function Tasks() {
     }
   };
 
-  // TASK CARD UI
+  // TASK CARD UI (Decrease sizes)
   const renderTaskCard = (task) => (
     <div
       key={task._id}
       style={{
         background: "#fff",
-        borderRadius: "14px",
-        padding: "18px",
-        marginBottom: "16px",
+        borderRadius: "8px", // reduced
+        padding: "10px", // reduced
+        marginBottom: "10px", // reduced
         border: "1px solid #e5e7eb",
         boxShadow:
           "0px 1px 2px rgba(16,30,54,0.03), 0px 0.5px 1px rgba(16,30,54,0.02)",
         transition: "box-shadow 0.14s",
         display: "flex",
         flexDirection: "column",
-        gap: "10px"
+        gap: "6px" // reduced
       }}
     >
       {/* TITLE */}
       <h3
         style={{
-          fontSize: "16px",
+          fontSize: "13px", // reduced
           fontWeight: 600,
           color: "#1e293b",
-          marginBottom: "8px",
-          letterSpacing: "-0.5px",
+          marginBottom: "4px", // reduced
+          letterSpacing: "-0.4px",
         }}
       >
         {task.title}
@@ -166,10 +166,10 @@ export default function Tasks() {
         <div
           style={{
             marginBottom: "0px",
-            fontSize: "14px",
+            fontSize: "11.5px", // reduced
             color: "#475569",
             whiteSpace: "pre-line",
-            minHeight: "22px"
+            minHeight: "16px" // reduced
           }}
         >
           {task.description}
@@ -181,15 +181,15 @@ export default function Tasks() {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "12px",
+          gap: "8px", // reduced
           marginBottom: "0px",
-          marginTop: "6px",
+          marginTop: "3px", // reduced
           flexWrap: "wrap",
         }}
       >
         <span
           style={{
-            padding: "5px 14px",
+            padding: "3px 8px", // reduced
             borderRadius: "999px",
             background:
               task.priority === "High"
@@ -203,7 +203,7 @@ export default function Tasks() {
                 : task.priority === "Medium"
                 ? "#d97706"
                 : "#16a34a",
-            fontSize: "13px",
+            fontSize: "11px", // reduced
             fontWeight: "600",
           }}
         >
@@ -213,7 +213,7 @@ export default function Tasks() {
         {task.dueDate && (
           <span
             style={{
-              fontSize: "14px",
+              fontSize: "11.5px", // reduced
               color: "#667399",
             }}
           >
@@ -228,7 +228,7 @@ export default function Tasks() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginTop: "10px"
+          marginTop: "4px" // reduced
         }}
       >
         {/* ASSIGNED USER */}
@@ -236,22 +236,22 @@ export default function Tasks() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "10px",
+            gap: "6px", // reduced
           }}
         >
           <div
             style={{
-              width: "30px",
-              height: "30px",
+              width: "20px", // reduced
+              height: "20px", // reduced
               borderRadius: "50%",
               background: "#10b981",
               color: "#fff",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "12px",
+              fontSize: "9px", // reduced
               fontWeight: "700",
-              letterSpacing: "0.5px"
+              letterSpacing: "0.3px"
             }}
           >
             {(task.assignedTo || "UN")
@@ -261,7 +261,7 @@ export default function Tasks() {
 
           <span
             style={{
-              fontSize: "14px",
+              fontSize: "11px", // reduced
               color: "#64748b",
               fontWeight: "500",
             }}
@@ -274,20 +274,20 @@ export default function Tasks() {
         <div
           style={{
             display: "flex",
-            gap: "8px",
+            gap: "5px", // reduced
           }}
         >
           <button
             onClick={() => openEdit(task)}
             style={{
-              padding: "6px 14px",
-              borderRadius: "8px",
+              padding: "3px 8px", // reduced
+              borderRadius: "5px", // reduced
               border: "1px solid #e0e7ef",
               background: "#f9fafb",
               color: "#2563eb",
               cursor: "pointer",
               fontWeight: 500,
-              fontSize: "13px",
+              fontSize: "11px", // reduced
               transition: "border 0.15s"
             }}
           >
@@ -297,14 +297,14 @@ export default function Tasks() {
           <button
             onClick={() => handleDelete(task._id)}
             style={{
-              padding: "6px 14px",
-              borderRadius: "8px",
+              padding: "3px 8px", // reduced
+              borderRadius: "5px", // reduced
               border: "none",
               background: "#fee2e2",
               color: "#ef4444",
               cursor: "pointer",
               fontWeight: 500,
-              fontSize: "13px"
+              fontSize: "11px" // reduced
             }}
           >
             Del
@@ -314,21 +314,21 @@ export default function Tasks() {
     </div>
   );
 
-  // TABLE VIEW UI (kept the same)
+  // TABLE VIEW UI (reduced sizes)
   const renderTableView = () => (
     <div style={{
       background: "#fff",
-      borderRadius: "18px",
-      padding: "18px",
+      borderRadius: "10px", // reduced
+      padding: "10px", // reduced
       border: "1px solid #e2e8f0",
-      minHeight: "420px",
+      minHeight: "240px", // reduced
       boxShadow:
         "0px 1px 2px rgba(16,30,54,0.03), 0px 0.5px 1px rgba(16,30,54,0.02)"
     }}>
       <h2
         style={{
-          marginBottom: "18px",
-          fontSize: "16px",
+          marginBottom: "10px", // reduced
+          fontSize: "13.5px", // reduced
           fontWeight: "600",
           color: "#1e293b",
         }}
@@ -336,16 +336,16 @@ export default function Tasks() {
         All Tasks
       </h2>
       {loading ? (
-        <p>Loading...</p>
+        <p style={{ fontSize: "11px", margin: "5px 0" }}>Loading...</p>
       ) : tasks.length === 0 ? (
-        <p>No tasks</p>
+        <p style={{ fontSize: "11px", margin: "5px 0" }}>No tasks</p>
       ) : (
         <div style={{ overflowX: "auto" }}>
           <table
             style={{
               width: "100%",
               borderCollapse: "collapse",
-              fontSize: "15px",
+              fontSize: "12px", // reduced
               color: "#374151",
               background: "#fff"
             }}
@@ -355,53 +355,53 @@ export default function Tasks() {
                 <th style={{
                   textAlign: "left",
                   borderBottom: "1px solid #e2e8f0",
-                  padding: "8px"
+                  padding: "5px" // reduced
                 }}>Title</th>
                 <th style={{
                   textAlign: "left",
                   borderBottom: "1px solid #e2e8f0",
-                  padding: "8px"
+                  padding: "5px"
                 }}>Description</th>
                 <th style={{
                   textAlign: "left",
                   borderBottom: "1px solid #e2e8f0",
-                  padding: "8px"
+                  padding: "5px"
                 }}>Assigned To</th>
                 <th style={{
                   textAlign: "left",
                   borderBottom: "1px solid #e2e8f0",
-                  padding: "8px"
+                  padding: "5px"
                 }}>Due Date</th>
                 <th style={{
                   textAlign: "left",
                   borderBottom: "1px solid #e2e8f0",
-                  padding: "8px"
+                  padding: "5px"
                 }}>Priority</th>
                 <th style={{
                   textAlign: "left",
                   borderBottom: "1px solid #e2e8f0",
-                  padding: "8px"
+                  padding: "5px"
                 }}>Status</th>
                 <th style={{
                   textAlign: "left",
                   borderBottom: "1px solid #e2e8f0",
-                  padding: "8px"
+                  padding: "5px"
                 }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {tasks.map((task) => (
                 <tr key={task._id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "8px", fontWeight: 500 }}>{task.title}</td>
-                  <td style={{ padding: "8px" }}>{task.description}</td>
-                  <td style={{ padding: "8px" }}>{task.assignedTo || "Unassigned"}</td>
-                  <td style={{ padding: "8px" }}>
+                  <td style={{ padding: "5px", fontWeight: 500 }}>{task.title}</td>
+                  <td style={{ padding: "5px" }}>{task.description}</td>
+                  <td style={{ padding: "5px" }}>{task.assignedTo || "Unassigned"}</td>
+                  <td style={{ padding: "5px" }}>
                     {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : ""}
                   </td>
-                  <td style={{ padding: "8px" }}>
+                  <td style={{ padding: "5px" }}>
                     <span
                       style={{
-                        padding: "4px 12px",
+                        padding: "2px 6px", // reduced
                         borderRadius: "999px",
                         background:
                           task.priority === "High"
@@ -415,26 +415,26 @@ export default function Tasks() {
                             : task.priority === "Medium"
                             ? "#d97706"
                             : "#16a34a",
-                        fontSize: "13px",
+                        fontSize: "11px", // reduced
                         fontWeight: "600",
                       }}
                     >
                       {task.priority}
                     </span>
                   </td>
-                  <td style={{ padding: "8px" }}>{task.status}</td>
-                  <td style={{ padding: "8px" }}>
+                  <td style={{ padding: "5px" }}>{task.status}</td>
+                  <td style={{ padding: "5px" }}>
                     <button
                       onClick={() => openEdit(task)}
                       style={{
-                        marginRight: "8px",
-                        padding: "5px 12px",
-                        borderRadius: "6px",
+                        marginRight: "5px", // reduced
+                        padding: "3px 7px", // reduced
+                        borderRadius: "4px", // reduced
                         border: "1px solid #dbeafe",
                         background: "#fff",
                         color: "#475569",
                         cursor: "pointer",
-                        fontSize: "13px"
+                        fontSize: "10.5px" // reduced
                       }}
                     >
                       Edit
@@ -442,13 +442,13 @@ export default function Tasks() {
                     <button
                       onClick={() => handleDelete(task._id)}
                       style={{
-                        padding: "5px 12px",
-                        borderRadius: "6px",
+                        padding: "3px 7px", // reduced
+                        borderRadius: "4px", // reduced
                         border: "none",
                         background: "#fee2e2",
                         color: "#ef4444",
                         cursor: "pointer",
-                        fontSize: "13px"
+                        fontSize: "10.5px" // reduced
                       }}
                     >
                       Del
@@ -467,17 +467,17 @@ export default function Tasks() {
   const kanbanColumns = [
     {
       title: (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <span
             style={{
               display: "inline-flex",
               alignItems: "center",
-              fontSize: 18,
+              fontSize: 14, // reduced
             }}
           >
             
           </span>
-          To Do
+          <span style={{ fontSize: "13px" }}>To Do</span>
         </span>
       ),
       items: todo,
@@ -485,9 +485,9 @@ export default function Tasks() {
     },
     {
       title: (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 18 }}></span>
-          In Progress
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 14 }}></span>
+          <span style={{ fontSize: "13px" }}>In Progress</span>
         </span>
       ),
       items: inProgress,
@@ -495,9 +495,9 @@ export default function Tasks() {
     },
     {
       title: (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 18 }}></span>
-          Done
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 14 }}></span>
+          <span style={{ fontSize: "13px" }}>Done</span>
         </span>
       ),
       items: completed,
@@ -509,15 +509,15 @@ export default function Tasks() {
   const getKanbanGridStyle = () => ({
     display: "grid",
     gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-    gap: "24px",
+    gap: "14px", // reduced
     alignItems: "flex-start"
   });
 
   // COLUMN CARD STYLE - dynamic height, clean padding/margin, no fixed minHeight
   const kanbanColumnStyle = {
     background: "#fff",
-    borderRadius: "18px",
-    padding: "20px 18px 16px 18px",
+    borderRadius: "10px", // reduced
+    padding: "10px", // reduced
     border: "1px solid #e2e8f0",
     boxShadow:
       "0px 1px 2px rgba(16,30,54,0.03), 0px 0.5px 1px rgba(16,30,54,0.02)",
@@ -533,7 +533,7 @@ export default function Tasks() {
   return (
     <div
       style={{
-        padding: "24px",
+        padding: "8px", // reduced
         background: "#f7fbfd",
         minHeight: "100vh",
         boxSizing: "border-box",
@@ -545,15 +545,15 @@ export default function Tasks() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "32px",
+          marginBottom: "14px", // reduced
         }}
       >
         <h1
           style={{
-            fontSize: "22px",
+            fontSize: "15px", // reduced
             fontWeight: "800",
             color: "#1e293b",
-            letterSpacing: "-0.5px",
+            letterSpacing: "-0.4px",
           }}
         >
           Task Management
@@ -565,11 +565,11 @@ export default function Tasks() {
             background: "linear-gradient(90deg,#2563eb,#1d4ed8 90%)",
             color: "#fff",
             border: "none",
-            padding: "11px 28px",
-            borderRadius: "12px",
+            padding: "7px 18px", // reduced
+            borderRadius: "8px", // reduced
             cursor: "pointer",
-            fontWeight: "700",
-            fontSize: "15px",
+            fontWeight: "600", // reduced
+            fontSize: "12px", // reduced
             boxShadow:
               "0px 1px 2px rgba(40,86,237,0.06), 0px 0.5px 1px rgba(40,86,237,0.02)",
             transition: "background 0.15s"
@@ -583,22 +583,22 @@ export default function Tasks() {
       <div
         style={{
           display: "flex",
-          gap: "14px",
-          marginBottom: "28px",
+          gap: "8px", // reduced
+          marginBottom: "12px", // reduced
         }}
       >
         <button
           onClick={() => setView("task")}
           style={{
             background: view === "task" ? "#eef4ff" : "#fff",
-            border: `1.5px solid ${view === "task" ? "#2563eb" : "#dbeafe"}`,
-            padding: "10px 27px",
-            borderRadius: "10px",
+            border: `1.2px solid ${view === "task" ? "#2563eb" : "#dbeafe"}`, // reduced
+            padding: "6px 15px", // reduced
+            borderRadius: "5px", // reduced
             cursor: "pointer",
-            fontWeight: 600,
+            fontWeight: 500, // reduced
             color: view === "task" ? "#2563eb" : "#475569",
-            fontSize: "15px",
-            boxShadow: view === "task" ? "0 2px 10px rgba(37,99,235,0.04)" : "none",
+            fontSize: "11.5px", // reduced
+            boxShadow: view === "task" ? "0 1px 5px rgba(37,99,235,0.04)" : "none", // reduced
             transition: "all 0.13s"
           }}
         >
@@ -609,14 +609,14 @@ export default function Tasks() {
           onClick={() => setView("table")}
           style={{
             background: view === "table" ? "#eef4ff" : "#fff",
-            border: `1.5px solid ${view === "table" ? "#2563eb" : "#dbeafe"}`,
-            padding: "10px 27px",
-            borderRadius: "10px",
+            border: `1.2px solid ${view === "table" ? "#2563eb" : "#dbeafe"}`,
+            padding: "6px 15px",
+            borderRadius: "5px",
             cursor: "pointer",
-            fontWeight: 600,
+            fontWeight: 500,
             color: view === "table" ? "#2563eb" : "#475569",
-            fontSize: "15px",
-            boxShadow: view === "table" ? "0 2px 10px rgba(37,99,235,0.04)" : "none",
+            fontSize: "11.5px",
+            boxShadow: view === "table" ? "0 1px 5px rgba(37,99,235,0.04)" : "none",
             transition: "all 0.13s"
           }}
         >
@@ -631,11 +631,11 @@ export default function Tasks() {
             <div key={column.key} style={kanbanColumnStyle}>
               <div
                 style={{
-                  marginBottom: "16px",
-                  fontSize: "16px",
+                  marginBottom: "8px", // reduced
+                  fontSize: "12.5px", // reduced
                   fontWeight: "700",
                   color: "#1e293b",
-                  letterSpacing: "-0.25px",
+                  letterSpacing: "-0.15px",
                   display: "flex",
                   alignItems: "center"
                 }}
@@ -644,11 +644,11 @@ export default function Tasks() {
               </div>
 
               {loading ? (
-                <div style={{ paddingTop: 16, color: "#64748b" }}>Loading...</div>
+                <div style={{ paddingTop: 7, color: "#64748b", fontSize: "11px" }}>Loading...</div>
               ) : column.items.length ? (
                 column.items.map(renderTaskCard)
               ) : (
-                <div style={{ color: "#64748b", fontSize: 15, padding: "22px 2px 6px 2px", textAlign: "center" }}>
+                <div style={{ color: "#64748b", fontSize: 11, padding: "10px 2px 4px 2px", textAlign: "center" }}>
                   No tasks
                 </div>
               )}
