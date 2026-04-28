@@ -127,10 +127,28 @@ export default function Auth() {
       <div className="login-card">
         {view === "login" ? (
           <>
-            <h1>Welcome Back</h1>
-            <p>Login to your CRM account</p>
+            <h1 style={{ textAlign: "center", marginBottom: "2px" }}>Welcome Back</h1>
+            <p
+              style={{
+                textAlign: "center",
+                margin: "0 auto 24px auto",
+                color: "#7a7a7a",
+                opacity: 0.18,
+                fontSize: 18,
+                fontWeight: 500,
+                letterSpacing: 1,
+                position: "relative",
+                top: "6px"
+              }}
+            >
+              Sign in
+            </p>
+       
+       
+       
+            
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: 16 }}>
               <label>Email</label>
 
               <input
@@ -142,8 +160,9 @@ export default function Auth() {
                 }
               />
             </div>
+      
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: 10 }}>
               <label>Password</label>
 
               <input
@@ -183,10 +202,11 @@ export default function Auth() {
           </>
         ) : (
           <>
-            <h1>Create Account</h1>
-            <p>Register for your CRM account</p>
+            <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Create Account</h1>
+       
+        
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: 16 }}>
               <label>Name</label>
               <input
                 type="text"
@@ -196,7 +216,7 @@ export default function Auth() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: 16 }}>
               <label>Email</label>
               <input
                 type="email"
@@ -206,7 +226,7 @@ export default function Auth() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: 16 }}>
               <label>Password</label>
               <input
                 type="password"
@@ -216,7 +236,8 @@ export default function Auth() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: 10 }}>
+       
               <label>Confirm Password</label>
               <input
                 type="password"
@@ -240,6 +261,7 @@ export default function Auth() {
                   cursor: "pointer",
                   marginLeft: "6px",
                 }}
+       
               >
                 Login
               </span>

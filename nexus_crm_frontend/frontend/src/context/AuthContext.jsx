@@ -172,7 +172,7 @@ export function AuthProvider({ children }) {
   /* ── LOGIN ────────────────────────────────────────────────── */
   const login = (userData) => {
     setUser(userData);
-    showToast("Welcome back! 👋", "success");
+    showToast("Welcome back! ", "success");
   };
 
   /* ── LOGOUT ───────────────────────────────────────────────── */

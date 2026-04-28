@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from "react";
+import { CgProfile } from "react-icons/cg";
 
 // Use localStorage key
 const PROFILE_STORAGE_KEY = "nexus_crm_profile_v1";
@@ -73,7 +74,25 @@ export default function Profile() {
       <div className="profile-grid">
         {/* Left card */}
         <div className="profile-card">
-          <div className="profile-avatar">👤</div>
+          <div
+            className="profile-avatar"
+            style={{
+              background: "#fff",
+              color: "#2563eb",
+              borderRadius: "50%",
+              width: 76,
+              height: 76,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 44,
+              boxShadow: "0 4px 18px rgba(37,99,235,0.08)"
+            }}
+          >
+            <CgProfile />
+          </div>
+     
+     
           <div className="profile-name">{profile.firstName} {profile.lastName}</div>
           <div className="profile-role">{profile.jobTitle}</div>
           <div className="profile-stats">

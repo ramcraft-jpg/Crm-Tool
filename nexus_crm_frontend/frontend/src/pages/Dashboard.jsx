@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useAuth, API } from "../context/AuthContext";
-
+import { GiOpenFolder } from "react-icons/gi";
+import { FaTasks } from "react-icons/fa";
+import { MdOutlineEventAvailable } from "react-icons/md";
+import { AiOutlineFileAdd } from "react-icons/ai";
+import { GrProjects } from "react-icons/gr";
 // LEAD STATUS COLORS
 const COLOR_NEW = "#2563eb";        // Royal Blue
 const COLOR_CONTACTED = "#A0AEC0";  // Soft Slate
@@ -205,10 +209,7 @@ export default function Dashboard({ onOpenModal }) {
     },
     {
       icon: (
-        <svg width="36" height="36" viewBox="0 0 22 22" fill="none" stroke={COLOR_NEW} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3.5" y="6" width="15" height="10" rx="2"/>
-          <path d="M7 10h2v2H7zM13 10h2v2h-2z" fill={COLOR_NEW}/>
-        </svg>
+        <GiOpenFolder size={36} color={COLOR_NEW} style={{ verticalAlign: "middle" }} />
       ),
       value: stats.totalProjects,
       label: "Total Projects"
@@ -327,10 +328,10 @@ export default function Dashboard({ onOpenModal }) {
           {/* Quick Actions */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px", marginBottom: "24px" }}>
             {[
-              { icon: "➕", label: "New Lead", modal: "lead" },
-              { icon: "📁", label: "New Project", modal: "project" },
-              { icon: "☑️", label: "New Task", modal: "task" },
-              { icon: "📅", label: "New Event", modal: "event" },
+              { icon: <AiOutlineFileAdd style={{ color: "#2563eb" }} />, label: "New Lead", modal: "lead" },
+              { icon: <GrProjects style={{ color: "#2563eb" }} />, label: "New Project", modal: "project" },
+              { icon: <FaTasks style={{ color: "#2563eb" }} />, label: "New Task", modal: "task" },
+              { icon: <MdOutlineEventAvailable style={{ color: "#2563eb" }} />, label: "New Event", modal: "event" },
             ].map((item, i) => (
               <div
                 key={i}
@@ -365,7 +366,8 @@ export default function Dashboard({ onOpenModal }) {
                   const maxVal = Math.max(...weeklyLeadStatus.map(
                     w => w.new + w.contacted + w.converted
                   ), 1);
-                  const totalHeight = 160;
+                  // Reduce the totalHeight (was 160, now e.g. 120)
+                  const totalHeight = 120;
                   const heightNew = item.new > 0 ? (item.new / maxVal) * totalHeight : 0;
                   const heightContacted = item.contacted > 0 ? (item.contacted / maxVal) * totalHeight : 0;
                   const heightConverted = item.converted > 0 ? (item.converted / maxVal) * totalHeight : 0;
@@ -429,7 +431,7 @@ export default function Dashboard({ onOpenModal }) {
                     width: 12,
                     height: 12,
                     background: COLOR_NEW,
-                    borderRadius: 3,
+                    borderRadius: "50%",
                     marginRight: 4
                   }} />
                   New
@@ -441,7 +443,7 @@ export default function Dashboard({ onOpenModal }) {
                     width: 12,
                     height: 12,
                     background: COLOR_CONTACTED,
-                    borderRadius: 3,
+                    borderRadius: "50%",
                     marginRight: 4
                   }} />
                   Contacted
@@ -453,7 +455,7 @@ export default function Dashboard({ onOpenModal }) {
                     width: 12,
                     height: 12,
                     background: COLOR_CONVERTED,
-                    borderRadius: 3,
+                    borderRadius: "50%",
                     marginRight: 4
                   }} />
                   Converted
@@ -462,32 +464,70 @@ export default function Dashboard({ onOpenModal }) {
             </div>
 
             {/* Lead Status Pie */}
-            <div style={{ background: "#fff", borderRadius: "24px", padding: "28px" }}>
+            <div style={{ background: "#fff", borderRadius: "24px", padding: "28px 28px 16px 28px" }}>
               <h2 style={{ marginBottom: "30px" }}>Lead Status</h2>
               <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                <div
+                {/* ---- PIE CHART REWRITE TO KEEP SHAPE LIKE GREY ---- */}
+                <svg
+                  width="180"
+                  height="180"
+                  viewBox="0 0 180 180"
                   style={{
-                    width: "140px",
-                    height: "140px",
                     borderRadius: "50%",
-                    background: `conic-gradient(
-                      ${COLOR_NEW} 0% ${newPct}%,
-                      ${COLOR_CONVERTED} ${newPct}% ${newPct + convertedPct}%,
-                      ${COLOR_CONTACTED} ${newPct + convertedPct}% 100%
-                    )`,
+                    background: "#fff",
                     position: "relative",
                   }}
                 >
-                  <div style={{
-                    width: "70px",
-                    height: "70px",
-                    background: "#fff",
-                    borderRadius: "50%",
-                    position: "absolute",
-                    top: "35px",
-                    left: "35px"
-                  }} />
-                </div>
+                  {/* New (blue) */}
+                  <circle
+                    r="80"
+                    cx="90"
+                    cy="90"
+                    fill="transparent"
+                    stroke={COLOR_NEW}
+                    strokeWidth="30"
+                    strokeDasharray={
+                      `${(newPct / 100) * 2 * Math.PI * 80} ${(2 * Math.PI * 80) - ((newPct / 100) * 2 * Math.PI * 80)}`
+                    }
+                    strokeDashoffset="0"
+                    transform="rotate(-90 90 90)"
+                  />
+                  {/* Converted (navy) */}
+                  <circle
+                    r="80"
+                    cx="90"
+                    cy="90"
+                    fill="transparent"
+                    stroke={COLOR_CONVERTED}
+                    strokeWidth="30"
+                    strokeDasharray={
+                      `${(convertedPct / 100) * 2 * Math.PI * 80} ${(2 * Math.PI * 80) - ((convertedPct / 100) * 2 * Math.PI * 80)}`
+                    }
+                    strokeDashoffset={`${-((newPct / 100) * 2 * Math.PI * 80)}`}
+                    transform="rotate(-90 90 90)"
+                  />
+                  {/* Contacted (grey) */}
+                  <circle
+                    r="80"
+                    cx="90"
+                    cy="90"
+                    fill="transparent"
+                    stroke={COLOR_CONTACTED}
+                    strokeWidth="30"
+                    strokeDasharray={
+                      `${(contactedPct / 100) * 2 * Math.PI * 80} ${(2 * Math.PI * 80) - ((contactedPct / 100) * 2 * Math.PI * 80)}`
+                    }
+                    strokeDashoffset={`${-(((newPct + convertedPct) / 100) * 2 * Math.PI * 80)}`}
+                    transform="rotate(-90 90 90)"
+                  />
+                  {/* Center white circle */}
+                  <circle
+                    r="47.5"
+                    cx="90"
+                    cy="90"
+                    fill="#fff"
+                  />
+                </svg>
                 <div style={{ lineHeight: "2" }}>
                   <p><span style={{ color: COLOR_NEW }}>●</span> New ({newPct}%) {pieStatus.new}</p>
                   <p><span style={{ color: COLOR_CONVERTED }}>●</span> Converted ({convertedPct}%) {pieStatus.converted}</p>
@@ -495,6 +535,7 @@ export default function Dashboard({ onOpenModal }) {
                 </div>
               </div>
             </div>
+       
           </div>
 
           {/* Recent Activity + Upcoming Events */}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CgProfile } from "react-icons/cg";
 
 const PAGE_TITLES = {
   dashboard: "Dashboard",
@@ -120,17 +121,18 @@ export default function Navbar({ activePage, onNavigate }) {
             width: "46px",
             height: "46px",
             borderRadius: "50%",
-            background: "#e7e8ea",
+            background: " #ffffff",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            color: "#ffffff",
+            color: "#2563eb",
             fontSize: "20px",
             cursor: "pointer",
             boxShadow: "0 4px 10px rgba(37,99,235,0.2)",
           }}
         >
-          👤
+          <CgProfile />
+     
         </div>
       </div>
     </div>
