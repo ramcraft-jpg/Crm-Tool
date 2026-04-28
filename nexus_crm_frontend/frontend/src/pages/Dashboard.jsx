@@ -6,6 +6,7 @@ import { FaTasks } from "react-icons/fa";
 import { MdOutlineEventAvailable } from "react-icons/md";
 import { AiOutlineFileAdd } from "react-icons/ai";
 import { GrProjects } from "react-icons/gr";
+
 // LEAD STATUS COLORS
 const COLOR_NEW = "#2563eb";        // Royal Blue
 const COLOR_CONTACTED = "#A0AEC0";  // Soft Slate
@@ -54,13 +55,12 @@ export default function Dashboard({ onOpenModal }) {
 
   const [weeklyLeadStatus, setWeeklyLeadStatus] = useState([]);
 
-  // The below event edit states and handlers remain, but will not be used in the event display
-  const [editingEvent, setEditingEvent] = useState(null);
-  const [eventForm, setEventForm] = useState({ title: "", date: "" });
-  const [eventFormError, setEventFormError] = useState("");
-
-  // NEW: dashboard-level floating error bar for event form errors shown at bottom-right
-  const [dashboardError, setDashboardError] = useState("");
+  // Bugfix: Remove unused event modal local state (it can break the page if event modal component is not present)
+  // The below event edit states and handlers remain, but will not be used in the event display. Commented out.
+  // const [editingEvent, setEditingEvent] = useState(null);
+  // const [eventForm, setEventForm] = useState({ title: "", date: "" });
+  // const [eventFormError, setEventFormError] = useState("");
+  // const [dashboardError, setDashboardError] = useState("");
 
   // Keep a refetch flag for events changes
   const [eventsVersion, setEventsVersion] = useState(0);
@@ -168,9 +168,9 @@ export default function Dashboard({ onOpenModal }) {
   // Handler to refetch ALL dashboard data, used after closing All Events popup (simulate update after event change)
   const handleEventsPopupClose = () => {
     setShowAllEvents(false);
-    setEditingEvent(null);
-    setEventForm({ title: "", date: "" });
-    setEventFormError("");
+    // setEditingEvent(null); // no effect, gone
+    // setEventForm({ title: "", date: "" });
+    // setEventFormError("");
     setTimeout(() => {
       setEventsVersion((v) => v + 1);
     }, 250); // Give time for potential modal to close before fetching
@@ -237,7 +237,15 @@ export default function Dashboard({ onOpenModal }) {
     },
   ];
 
-  // -- Event edit handlers remain for reference but their trigger is now removed
+  // -- Event modal trigger bugfix: Only call onOpenModal if it is defined
+  function handleQuickActionModal(modalType) {
+    if (typeof onOpenModal === "function") {
+      onOpenModal(modalType);
+    } else {
+      // Defensive: show error to user if misconfigured (can help debug unexpected blank page)
+      alert("Add modal handler is not properly configured!");
+    }
+  }
 
   if (loading) {
     return (
@@ -246,8 +254,6 @@ export default function Dashboard({ onOpenModal }) {
       </div>
     );
   }
-
-  // --- Pie chart pop out/hover is removed. No tooltips, no pop-out effect.
 
   return (
     <div style={{ width: "100%", minHeight: "100vh", background: "#f5f8fc", padding: 0, display: "flex" }}>
@@ -274,7 +280,7 @@ export default function Dashboard({ onOpenModal }) {
             ].map((item, i) => (
               <button
                 key={i}
-                onClick={() => onOpenModal(item.modal)}
+                onClick={() => handleQuickActionModal(item.modal)}
                 style={{
                   background: "#fff",
                   borderRadius: "18px",
@@ -340,7 +346,6 @@ export default function Dashboard({ onOpenModal }) {
               }
             `}
           </style>
-     
 
           {/* Chart + Lead Status with Connected Weekly Activity */}
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "20px", marginBottom: "24px" }}>

@@ -1,114 +1,149 @@
-import { useState } from "react";
+// Events.jsx
+
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import EventForm from "../components/EventForm";
 import { StatusBadge } from "../components/Card";
 
-// Add "Follow up", "Deadline" and "Other" to available event types, with "View All" option at the start
 const EVENT_TYPES = [
   "View All",
+  "Meeting",
   "Call",
   "Demo",
-  "Meeting",
   "Follow up",
   "Deadline",
-  "Other"
+  "Other",
 ];
 
 export default function Events() {
   const { events, setEvents, showToast } = useAuth();
 
-  // Set default filter to "View All"
-  const [filter, setFilter] = useState(EVENT_TYPES[0]);
+  const [filter, setFilter] = useState("View All");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // --------- Data Clean-Up Helper ----------
-  // Clean the event type field for display and filtering.
-  // Return exactly "Call", "Demo", "Deadline", "Follow up", "Meeting", or "Other" if the event type matches (case-insensitive), including fixing misspellings.
-  function getCleanType(type) {
+  // CLEAN TYPE
+  const getCleanType = (type) => {
     if (!type) return "—";
     const norm = type.toString().toLowerCase().trim();
 
-    // Strict match for allowed types + handle common misspellings for "Demo", "Deadline", "Follow up" etc.
     if (norm === "call") return "Call";
     if (
       norm === "demo" ||
       norm === "demoo" ||
       norm === "demonstration" ||
-      norm === "demon" ||
       norm === "demmo"
-    ) return "Demo";
+    ) {
+      return "Demo";
+    }
     if (
       norm === "meeting" ||
       norm === "meetng" ||
       norm === "meting"
-    ) return "Meeting";
+    ) {
+      return "Meeting";
+    }
     if (
       norm === "follow up" ||
       norm === "follow-up" ||
       norm === "followup" ||
       norm === "f/up" ||
       norm === "fup"
-    ) return "Follow up";
+    ) {
+      return "Follow up";
+    }
     if (
       norm === "deadline" ||
       norm === "dead line" ||
       norm === "due"
-    ) return "Deadline";
+    ) {
+      return "Deadline";
+    }
     if (
       norm === "other" ||
       norm === "interview" ||
       norm === "interviw" ||
       norm === "interveiw"
-    ) return "Other";
-
-    // fallback
+    ) {
+      return "Other";
+    }
     return "—";
-  }
+  };
 
-  // Filter events list ("View All" shows all, otherwise filter by type using clean type)
-  // REMOVE completed events from the list (i.e. events with status "Completed")
+  // Fetch all events from backend
+  const fetchEvents = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/events", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!res.ok) {
+        throw new Error("Failed to load events");
+      }
+      const data = await res.json();
+      setEvents(data);
+    } catch (error) {
+      console.error("Fetch Events Error:", error);
+      showToast("Failed to load events", "danger");
+      setEvents([]); // Prevent undefined if request fails
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+    // eslint-disable-next-line
+  }, []);
+
+  // FILTERED EVENTS
   const filtered = (Array.isArray(events) ? events : [])
     .filter((e) => e.status !== "Completed")
     .filter(
       (e) =>
-        filter === "View All" || getCleanType(e.type) === filter
+        filter === "View All" ||
+        getCleanType(e.type) === filter
     );
 
-  // Open add event modal
+  // OPEN ADD
   const openAdd = () => {
     setEditing(null);
     setModalOpen(true);
   };
 
-  // Open edit event modal
+  // OPEN EDIT
   const openEdit = (event) => {
     setEditing({
       ...event,
       date: event.startDate
-        ? new Date(event.startDate).toISOString().split("T")[0]
+        ? new Date(event.startDate)
+            .toISOString()
+            .split("T")[0]
         : "",
       time: event.endDate
-        ? new Date(event.endDate).toISOString().slice(11, 16)
+        ? new Date(event.endDate)
+            .toISOString()
+            .slice(11, 16)
         : "",
-      participants: event.attendees
+      participants: Array.isArray(event.attendees)
         ? event.attendees.join(", ")
         : "",
       desc: event.description || "",
-      // Normalize the event type so the form shows the correct value
       type: getCleanType(event.type),
     });
-
     setModalOpen(true);
   };
 
-  // Save (add or edit) event
+  // SAVE EVENT
   const handleSave = async (form) => {
     try {
-      // Ensure never saving "View All" as a type! Default to "Call" if not a valid event type (enforced by dropdown)
-      const validType = EVENT_TYPES.slice(1).find(
-        (t) => t === form.type
-      ) || EVENT_TYPES[1];
+      const validType =
+        EVENT_TYPES.slice(1).find(
+          (t) => t === form.type
+        ) || "Meeting";
 
       const payload = {
         title: form.title,
@@ -119,7 +154,9 @@ export default function Events() {
           : null,
         endDate:
           form.date && form.time
-            ? new Date(`${form.date}T${form.time}`)
+            ? new Date(
+                `${form.date}T${form.time}`
+              )
             : null,
         type: validType,
         attendees: form.participants
@@ -132,7 +169,7 @@ export default function Events() {
         isAllDay: false,
       };
 
-      // Update event
+      // UPDATE
       if (editing && editing._id) {
         const updateRes = await fetch(
           `http://localhost:5000/api/events/${editing._id}`,
@@ -150,9 +187,13 @@ export default function Events() {
           throw new Error("Failed to update event");
         }
 
-        showToast("Event updated successfully!", "success");
+        showToast(
+          "Event updated successfully!",
+          "success"
+        );
       }
-      // Create event
+
+      // CREATE
       else {
         const createRes = await fetch(
           "http://localhost:5000/api/events",
@@ -179,25 +220,16 @@ export default function Events() {
         );
       }
 
-      // Refresh events
-      const refreshed = await fetch(
-        "http://localhost:5000/api/events",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      const freshData = await refreshed.json();
-      setEvents(freshData);
+      // REFRESH
+      await fetchEvents();
 
       setModalOpen(false);
       setEditing(null);
-
     } catch (error) {
-      console.error("SAVE EVENT ERROR:", error);
-
+      console.error(
+        "SAVE EVENT ERROR:",
+        error
+      );
       showToast(
         error.message || "Something went wrong!",
         "danger"
@@ -205,9 +237,13 @@ export default function Events() {
     }
   };
 
-  // Delete event
+  // DELETE EVENT
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this event?")) return;
+    if (
+      !window.confirm(
+        "Delete this event?"
+      )
+    ) return;
 
     try {
       await fetch(
@@ -220,17 +256,7 @@ export default function Events() {
         }
       );
 
-      const refreshed = await fetch(
-        "http://localhost:5000/api/events",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      const freshData = await refreshed.json();
-      setEvents(freshData);
+      await fetchEvents();
 
       showToast(
         "Event deleted successfully!",
@@ -246,13 +272,26 @@ export default function Events() {
     }
   };
 
-  // UI
   return (
-    <div style={{ padding: "30px", background: "#f5f8fc", minHeight: "100vh" }}>
+    <div
+      style={{
+        padding: "30px",
+        background: "#f5f8fc",
+        minHeight: "100vh",
+      }}
+    >
       {/* HEADER */}
       <div className="section-header">
-        <div className="section-title">Event Management</div>
-        <button className="btn btn-primary" onClick={openAdd}>+ Add Event</button>
+        <div className="section-title">
+          Event Management
+        </div>
+
+        <button
+          className="btn btn-primary"
+          onClick={openAdd}
+        >
+          + Add Event
+        </button>
       </div>
 
       {/* FILTERS */}
@@ -261,18 +300,23 @@ export default function Events() {
           <div
             key={type}
             className={`filter-btn${filter === type ? " active" : ""}`}
-            onClick={() => setFilter(type)}
+            onClick={() =>
+              setFilter(type)
+            }
           >
             {type}
           </div>
         ))}
       </div>
 
-      {/* EVENT TABLE */}
+      {/* TABLE */}
       <div className="table-wrap">
-        {(Array.isArray(events) && events.length === 0) ? (
+        {loading ? (
           <div className="empty-state">
-            <div className="empty-icon"></div>
+            <div className="empty-text">Loading events...</div>
+          </div>
+        ) : !Array.isArray(events) || events.length === 0 ? (
+          <div className="empty-state">
             <div className="empty-text">No events found.</div>
           </div>
         ) : (
@@ -281,65 +325,86 @@ export default function Events() {
               <tr>
                 <th>Type</th>
                 <th>Title</th>
-                <th>Date/Time</th>
+                <th>Date / Time</th>
                 <th>Participants</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
+
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan="6">
                     <div className="empty-state">
-                      <div className="empty-icon"></div>
-                      <div className="empty-text">No events found for this filter.</div>
+                      <div className="empty-text">
+                        No events found
+                        for this filter.
+                      </div>
                     </div>
                   </td>
                 </tr>
               ) : (
                 filtered.map((e) => (
                   <tr key={e._id}>
-                    {/* Type - Always show the cleaned up type */}
                     <td>
                       {getCleanType(e.type)}
                     </td>
-                    {/* Title */}
-                    <td>{e.title || "—"}</td>
-                    {/* Date / Time */}
+
+                    <td>
+                      {e.title || "—"}
+                    </td>
+
                     <td>
                       {e.startDate
-                        ? new Date(e.startDate).toLocaleDateString()
+                        ? new Date(
+                            e.startDate
+                          ).toLocaleDateString()
                         : "—"}
-                      {e.endDate &&
-                        <span style={{ color: "#888", fontSize: 12 }}>
+
+                      {e.endDate && (
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: "#64748b",
+                          }}
+                        >
                           {" "}
-                          {new Date(e.endDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          {new Date(
+                            e.endDate
+                          ).toLocaleTimeString(
+                            [],
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
                         </span>
-                      }
+                      )}
                     </td>
-                    {/* Participants */}
+
                     <td>
-                      <span style={{
-                        fontSize: 12,
-                        color: "#64748b",
-                      }}>
-                        {Array.isArray(e.attendees) && e.attendees.length > 0
-                          ? e.attendees.join(", ")
-                          : "—"}
-                      </span>
+                      {Array.isArray(e.attendees) && e.attendees.length > 0
+                        ? e.attendees.join(", ")
+                        : "—"}
                     </td>
-                    {/* Status */}
+
                     <td>
                       <StatusBadge status={e.status} />
                     </td>
-                    {/* Actions */}
+
                     <td>
                       <div className="td-actions">
-                        <button className="btn btn-outline btn-sm" onClick={() => openEdit(e)}>
+                        <button
+                          className="btn btn-outline btn-sm"
+                          onClick={() => openEdit(e)}
+                        >
                           Edit
                         </button>
-                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(e._id)}>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => handleDelete(e._id)}
+                        >
                           Delete
                         </button>
                       </div>
@@ -361,8 +426,9 @@ export default function Events() {
         }}
         onSave={handleSave}
         initial={editing}
-        // Pass all event types, now including "Follow up", "Deadline", and "Other" ("View All" is filtered out)
-        eventTypes={EVENT_TYPES.filter(t => t !== "View All")}
+        eventTypes={EVENT_TYPES.filter(
+          (t) => t !== "View All"
+        )}
       />
     </div>
   );

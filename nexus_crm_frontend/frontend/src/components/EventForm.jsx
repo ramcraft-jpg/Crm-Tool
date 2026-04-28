@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
 
-const EVENT_TYPES = ["Call", "Demo", "Deadline", "Follow up", "Meeting", "other"];
+
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useAuth, API } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const EMPTY = {
   title: "",
@@ -16,34 +19,56 @@ export default function EventForm({
   onClose,
   onSave,
   initial,
+  eventTypes = [],
 }) {
+  const { showToast } = useAuth();
+  const navigate = useNavigate();
+
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState("");
 
-  // Always keep form in sync with latest initial
   useEffect(() => {
     if (open) {
-      if (initial) {
-        setForm({
+      let startForm = { ...EMPTY };
+
+      if (
+        initial &&
+        typeof initial === "object" &&
+        Object.keys(initial).length
+      ) {
+        startForm = {
           title: initial.title || "",
-          date: initial.date || initial.startDate || "",
-          time: initial.time || "",
-          type: initial.type && EVENT_TYPES.includes(initial.type) ? initial.type : "Meeting",
-          // If participants is an array, join with a comma for the input field
-          participants: Array.isArray(initial.participants)
-            ? initial.participants.join(", ")
-            : typeof initial.participants === "string"
-              ? initial.participants
-              : (Array.isArray(initial.attendees)
-                  ? initial.attendees.join(", ") : ""),
-          desc: initial.desc || initial.description || "",
-        });
-      } else {
-        setForm(EMPTY);
+          date:
+            initial.date ||
+            (initial.startDate
+              ? new Date(initial.startDate)
+                  .toISOString()
+                  .split("T")[0]
+              : ""),
+          time:
+            initial.time ||
+            (initial.endDate
+              ? new Date(initial.endDate)
+                  .toISOString()
+                  .slice(11, 16)
+              : ""),
+          type: initial.type || "Meeting",
+          participants: Array.isArray(initial.attendees)
+            ? initial.attendees.join(", ")
+            : initial.participants || "",
+          desc:
+            initial.desc ||
+            initial.description ||
+            "",
+        };
       }
+
+      setForm(startForm);
+      setError("");
+    } else {
+      setForm(EMPTY);
       setError("");
     }
-    // eslint-disable-next-line
   }, [initial, open]);
 
   const set = (key, value) => {
@@ -51,54 +76,33 @@ export default function EventForm({
       ...prev,
       [key]: value,
     }));
-    setError(""); // Clear error message on input
+    setError("");
   };
 
   const handleSubmit = (e) => {
-    e && e.preventDefault();
-    if (!form.title.trim() && !form.date) {
-      setError("Event title and date are required.");
-      return;
-    }
+    e.preventDefault();
+
     if (!form.title.trim()) {
       setError("Event title is required.");
       return;
     }
+
     if (!form.date) {
       setError("Event date is required.");
       return;
     }
 
-    // Split participants string (user input) into an array
-    const parsedParticipants = form.participants
-      ? form.participants
-          .split(",")
-          .map((p) => p.trim())
-          .filter(Boolean)
-      : [];
-
-    // Compose a normalized event object
     const eventToSave = {
       title: form.title.trim(),
-      startDate: form.date,
       date: form.date,
       time: form.time,
       type: form.type,
-      attendees: parsedParticipants.length ? parsedParticipants : (initial?.attendees || []),
       participants: form.participants,
       desc: form.desc,
-      description: form.desc,
-      _id: initial?._id   // Pass _id for edit (so parent knows this is an update)
+      _id: initial?._id,
     };
 
     onSave(eventToSave);
-
-    // After saving, don't close/reset here, let parent manage state,
-    // otherwise modal closes before parent updates, causing visual flicker/no update.
-    // The parent should provide open=false when done, which resets the form accordingly.
-    // setForm(EMPTY);
-    // setError("");
-    // onClose();
   };
 
   if (!open) return null;
@@ -106,7 +110,10 @@ export default function EventForm({
   return (
     <div
       className="modal-overlay open"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onClick={(e) =>
+        e.target === e.currentTarget &&
+        onClose()
+      }
     >
       <div className="modal">
         {/* HEADER */}
@@ -116,20 +123,30 @@ export default function EventForm({
               ? "Edit Event"
               : "Schedule New Event"}
           </div>
-          <button className="modal-close" onClick={onClose}>
+
+          <button
+            className="modal-close"
+            onClick={onClose}
+          >
             ✕
           </button>
         </div>
 
-        <form className="form-grid" onSubmit={handleSubmit} autoComplete="off">
-          {/* TITLE */}
+        {/* FORM */}
+        <form
+          className="form-grid"
+          onSubmit={handleSubmit}
+          autoComplete="off"
+        >
+          {/* EVENT TITLE */}
           <div className="form-group full">
             <label>Event Title *</label>
             <input
               value={form.title}
-              onChange={(e) => set("title", e.target.value)}
+              onChange={(e) =>
+                set("title", e.target.value)
+              }
               placeholder="Event title"
-              autoFocus
               required
             />
           </div>
@@ -140,7 +157,9 @@ export default function EventForm({
             <input
               type="date"
               value={form.date}
-              onChange={(e) => set("date", e.target.value)}
+              onChange={(e) =>
+                set("date", e.target.value)
+              }
               required
             />
           </div>
@@ -151,20 +170,27 @@ export default function EventForm({
             <input
               type="time"
               value={form.time}
-              onChange={(e) => set("time", e.target.value)}
+              onChange={(e) =>
+                set("time", e.target.value)
+              }
             />
           </div>
 
-          {/* TYPE */}
+          {/* EVENT TYPE */}
           <div className="form-group">
             <label>Event Type</label>
             <select
               value={form.type}
-              onChange={(e) => set("type", e.target.value)}
+              onChange={(e) =>
+                set("type", e.target.value)
+              }
             >
-              {EVENT_TYPES.map((type) => (
-                <option key={type} value={type}>
-                 <Meeting></Meeting>
+              {eventTypes.map((type) => (
+                <option
+                  key={type}
+                  value={type}
+                >
+                  {type}
                 </option>
               ))}
             </select>
@@ -173,36 +199,45 @@ export default function EventForm({
           {/* PARTICIPANTS */}
           <div className="form-group full">
             <label>
-              Participants (comma separated)
+              Participants
+              (comma separated)
             </label>
+
             <input
               value={form.participants}
-              onChange={(e) => set("participants", e.target.value)}
-              placeholder=""
+              onChange={(e) =>
+                set(
+                  "participants",
+                  e.target.value
+                )
+              }
+              placeholder="John, Alex, Smith"
             />
           </div>
 
           {/* DESCRIPTION */}
           <div className="form-group full">
             <label>Description</label>
+
             <textarea
               value={form.desc}
-              onChange={(e) => set("desc", e.target.value)}
+              onChange={(e) =>
+                set("desc", e.target.value)
+              }
               placeholder="Event details..."
             />
           </div>
 
-          {/* ERROR MESSAGE */}
+          {/* ERROR */}
           {error && (
             <div
               style={{
                 color: "#d10c29",
                 background: "#fde8eb",
-                padding: "8px 16px",
-                borderRadius: "6px",
-                margin: "12px 0 0 0",
-                fontSize: 14,
-                gridColumn: "1/-1",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                gridColumn: "1 / -1",
               }}
             >
               {error}
@@ -210,15 +245,24 @@ export default function EventForm({
           )}
 
           {/* FOOTER */}
-          <div className="form-footer" style={{ gridColumn: "1/-1" }}>
+          <div
+            className="form-footer"
+            style={{
+              gridColumn: "1 / -1",
+            }}
+          >
             <button
-              className="btn btn-outline"
               type="button"
+              className="btn btn-outline"
               onClick={onClose}
             >
               Cancel
             </button>
-            <button className="btn btn-primary" type="submit">
+
+            <button
+              type="submit"
+              className="btn btn-primary"
+            >
               Save Event
             </button>
           </div>
@@ -227,3 +271,4 @@ export default function EventForm({
     </div>
   );
 }
+
