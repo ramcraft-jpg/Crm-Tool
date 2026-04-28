@@ -217,7 +217,7 @@ export default function Tasks() {
               color: "#667399",
             }}
           >
-            📅 {new Date(task.dueDate).toLocaleDateString()}
+            {new Date(task.dueDate).toLocaleDateString()}
           </span>
         )}
       </div>
@@ -475,7 +475,7 @@ export default function Tasks() {
               fontSize: 18,
             }}
           >
-            📝
+            
           </span>
           To Do
         </span>
@@ -486,7 +486,7 @@ export default function Tasks() {
     {
       title: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 18 }}>🚧</span>
+          <span style={{ fontSize: 18 }}></span>
           In Progress
         </span>
       ),
@@ -496,7 +496,7 @@ export default function Tasks() {
     {
       title: (
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 18 }}>✅</span>
+          <span style={{ fontSize: 18 }}></span>
           Done
         </span>
       ),

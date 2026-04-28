@@ -107,9 +107,7 @@ export default function ProjectForm({
               {[
                 "Planning",
                 "In Progress",
-                "On Hold",
                 "Completed",
-                "Cancelled",
               ].map((s) => (
                 <option key={s}>{s}</option>
               ))}

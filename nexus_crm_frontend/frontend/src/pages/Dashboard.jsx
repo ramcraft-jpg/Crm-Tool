@@ -54,7 +54,7 @@ export default function Dashboard({ onOpenModal }) {
 
   const [weeklyLeadStatus, setWeeklyLeadStatus] = useState([]);
 
-  // State for event editing/updating in the popup
+  // The below event edit states and handlers remain, but will not be used in the event display
   const [editingEvent, setEditingEvent] = useState(null);
   const [eventForm, setEventForm] = useState({ title: "", date: "" });
   const [eventFormError, setEventFormError] = useState("");
@@ -237,70 +237,7 @@ export default function Dashboard({ onOpenModal }) {
     },
   ];
 
-  // -- NEW: Handler to open the edit popup for an event
-  const handleEditEventClick = (event) => {
-    setEditingEvent(event);
-    setEventForm({
-      title: event.title || event.name || "",
-      date: event.date ? event.date.slice(0, 10) : "",
-    });
-    setEventFormError("");
-    setShowAllEvents(true);
-  };
-
-  // -- NEW: Handler for changing event form inputs
-  const handleEventFormChange = (e) => {
-    setEventForm({
-      ...eventForm,
-      [e.target.name]: e.target.value,
-    });
-    setEventFormError('');
-    setDashboardError(""); // Clear dashboard error on input
-  };
-
-  // -- NEW: Handler for saving/updating event from dashboard popup
-  const handleEventFormSubmit = async (e) => {
-    e.preventDefault();
-    // Validation
-    if (!eventForm.title.trim() || !eventForm.date.trim()) {
-      setEventFormError("Title and Date are required");
-      setDashboardError("Event title and start date are required.");
-      // Dashboard error bar will appear at bottom right and auto-hide
-      setTimeout(() => setDashboardError(""), 4000);
-      return;
-    }
-    try {
-      await axios.put(
-        `${API}/events/${editingEvent._id || editingEvent.id}`,
-        { ...editingEvent, title: eventForm.title.trim(), date: eventForm.date },
-        authHeader()
-      );
-      showToast("Event updated successfully", "success");
-      setShowAllEvents(false);
-      setEditingEvent(null);
-      setEventForm({ title: "", date: "" });
-      setEventFormError("");
-      setTimeout(() => setEventsVersion((v) => v + 1), 250);
-    } catch (error) {
-      setEventFormError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to update event"
-      );
-      setDashboardError(
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to update event"
-      );
-      setTimeout(() => setDashboardError(""), 4000);
-      showToast(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to update event",
-        "danger"
-      );
-    }
-  };
+  // -- Event edit handlers remain for reference but their trigger is now removed
 
   if (loading) {
     return (
@@ -655,26 +592,10 @@ export default function Dashboard({ onOpenModal }) {
               <div style={{ lineHeight: "2.2" }}>
                 {upcomingEvents.length > 0 ? (
                   upcomingEvents.map((event, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div key={i} style={{ display: "flex", alignItems: "center" }}>
                       <span>
                         📅 {event.title || event.name} {event.date ? new Date(event.date).toLocaleDateString() : "No Date"}
                       </span>
-                      <button
-                        style={{
-                          marginLeft: 12,
-                          padding: "2px 7px",
-                          fontSize: 12,
-                          borderRadius: 5,
-                          border: "1px solid #cbd5e1",
-                          cursor: "pointer",
-                          background: "#e0e7ef",
-                          color: "#000", // for better visual cue on Edit of black events
-                        }}
-                        onClick={() => handleEditEventClick(event)}
-                        title="Edit Event"
-                      >
-                        Edit
-                      </button>
                     </div>
                   ))
                 ) : (
@@ -712,116 +633,16 @@ export default function Dashboard({ onOpenModal }) {
               <div style={{ width: "500px", background: "#fff", borderRadius: "24px", padding: "30px", maxHeight: "70vh", overflowY: "auto" }}>
                 <h2>All Upcoming Events</h2>
                 <div style={{ lineHeight: "2.2", marginTop: "20px" }}>
-                  {/* If editing, show the event edit form instead of list */}
-                  {editingEvent ? (
-                    <form onSubmit={handleEventFormSubmit}>
-                      <div style={{ marginBottom: "15px" }}>
-                        <label>
-                          Title
-                          <input
-                            style={{
-                              display: "block",
-                              marginTop: 3,
-                              border: "1px solid #cbd5e1",
-                              borderRadius: 6,
-                              padding: "6px 10px",
-                              width: "100%",
-                              fontFamily: "inherit",
-                              fontSize: 16,
-                            }}
-                            type="text"
-                            name="title"
-                            value={eventForm.title}
-                            onChange={handleEventFormChange}
-                            autoFocus
-                          />
-                        </label>
+                  {allEvents.length > 0 ? (
+                    allEvents.map((event, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center" }}>
+                        <span>
+                          📅 {event.title || event.name} {event.date ? new Date(event.date).toLocaleDateString() : "No Date"}
+                        </span>
                       </div>
-                      <div style={{ marginBottom: "15px" }}>
-                        <label>
-                          Date
-                          <input
-                            style={{
-                              display: "block",
-                              marginTop: 3,
-                              border: "1px solid #cbd5e1",
-                              borderRadius: 6,
-                              padding: "6px 10px",
-                              width: "100%",
-                              fontFamily: "inherit",
-                              fontSize: 16,
-                            }}
-                            type="date"
-                            name="date"
-                            value={eventForm.date}
-                            onChange={handleEventFormChange}
-                          />
-                        </label>
-                      </div>
-                      {eventFormError && (
-                        <div style={{ color: "red", marginBottom: 12 }}>{eventFormError}</div>
-                      )}
-                      <div style={{ display: "flex", gap: 10 }}>
-                        <button
-                          type="submit"
-                          style={{
-                            background: COLOR_NEW,
-                            color: "#fff",
-                            border: "none",
-                            padding: "12px 24px",
-                            borderRadius: "10px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          Save
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingEvent(null);
-                            setEventForm({ title: "", date: "" });
-                            setEventFormError("");
-                          }}
-                          style={{
-                            border: `1px solid #cbd5e1`,
-                            padding: "12px 24px",
-                            borderRadius: "10px",
-                            cursor: "pointer",
-                            background: "#f3f4f8",
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
+                    ))
                   ) : (
-                    allEvents.length > 0 ? (
-                      allEvents.map((event, i) => (
-                        <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <span>
-                            📅 {event.title || event.name} {event.date ? new Date(event.date).toLocaleDateString() : "No Date"}
-                          </span>
-                          <button
-                            style={{
-                              marginLeft: 12,
-                              padding: "2px 7px",
-                              fontSize: 12,
-                              borderRadius: 5,
-                              border: "1px solid #cbd5e1",
-                              cursor: "pointer",
-                              background: "#e0e7ef",
-                              color: "#000",
-                            }}
-                            onClick={() => handleEditEventClick(event)}
-                            title="Edit Event"
-                          >
-                            Edit
-                          </button>
-                        </div>
-                      ))
-                    ) : (
-                      <p>No events found</p>
-                    )
+                    <p>No events found</p>
                   )}
                 </div>
                 <button

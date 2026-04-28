@@ -15,9 +15,9 @@ function getStoredProfile() {
     }
   }
   return {
-    firstName: "Arjun",
-    lastName: "Kumar",
-    email: "admin@nexus.com",
+    firstName: "ram",
+    lastName: "dasu",
+    email: "admin@gmail.com",
     phone: "+91 98765 43210",
     department: "Sales & Operations",
     jobTitle: "CRM Administrator",
