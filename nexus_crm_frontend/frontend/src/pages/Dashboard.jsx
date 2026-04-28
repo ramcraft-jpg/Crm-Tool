@@ -9,7 +9,7 @@ import { GrProjects } from "react-icons/gr";
 // LEAD STATUS COLORS
 const COLOR_NEW = "#2563eb";        // Royal Blue
 const COLOR_CONTACTED = "#A0AEC0";  // Soft Slate
-const COLOR_CONVERTED = "#1e293b";  // Deep Navy
+const COLOR_CONVERTED = "#000";     // Black
 
 // Helper function to get the start of the current week (Monday)
 const getStartOfWeek = () => {
@@ -310,6 +310,8 @@ export default function Dashboard({ onOpenModal }) {
     );
   }
 
+  // --- Pie chart pop out/hover is removed. No tooltips, no pop-out effect.
+
   return (
     <div style={{ width: "100%", minHeight: "100vh", background: "#f5f8fc", padding: 0, display: "flex" }}>
       <div style={{ flex: 1, marginLeft: 0 }}>
@@ -333,7 +335,7 @@ export default function Dashboard({ onOpenModal }) {
               { icon: <FaTasks style={{ color: "#2563eb" }} />, label: "New Task", modal: "task" },
               { icon: <MdOutlineEventAvailable style={{ color: "#2563eb" }} />, label: "New Event", modal: "event" },
             ].map((item, i) => (
-              <div
+              <button
                 key={i}
                 onClick={() => onOpenModal(item.modal)}
                 style={{
@@ -342,13 +344,66 @@ export default function Dashboard({ onOpenModal }) {
                   padding: "30px",
                   textAlign: "center",
                   cursor: "pointer",
+                  border: "none",
+                  outline: "none",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+                  transition: "transform 0.1s, box-shadow 0.1s",
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  position: "relative",
                 }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = "scale(1.05)";
+                  e.currentTarget.style.boxShadow = "0 8px 32px rgba(37,99,235,0.13)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.06)";
+                }}
+                tabIndex={0}
+                aria-label={item.label}
               >
                 <div style={{ fontSize: "32px", marginBottom: "10px" }}>{item.icon}</div>
                 {item.label}
-              </div>
+                {/* Pop-up tooltip on hover or focus */}
+                <span
+                  style={{
+                    opacity: 0,
+                    visibility: "hidden",
+                    transition: "opacity 0.2s",
+                    background: "#2563eb",
+                    color: "#fff",
+                    fontSize: 14,
+                    borderRadius: 6,
+                    position: "absolute",
+                    left: "50%",
+                    top: "-38px",
+                    transform: "translateX(-50%)",
+                    whiteSpace: "nowrap",
+                    padding: "6px 14px",
+                    zIndex: 10,
+                    pointerEvents: "none",
+                  }}
+                  className="quick-action-tooltip"
+                >
+                  Click to add {item.label}
+                </span>
+              </button>
             ))}
           </div>
+          <style>
+            {`
+              .quick-action-tooltip {
+                pointer-events: none;
+              }
+              button[aria-label]:hover .quick-action-tooltip,
+              button[aria-label]:focus .quick-action-tooltip {
+                opacity: 1 !important;
+                visibility: visible !important;
+              }
+            `}
+          </style>
+     
 
           {/* Chart + Lead Status with Connected Weekly Activity */}
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "20px", marginBottom: "24px" }}>
@@ -400,7 +455,7 @@ export default function Dashboard({ onOpenModal }) {
                             transition: "height 0.3s",
                           }}
                         />
-                        {/* Converted (top) */}
+                        {/* Converted (top, black) */}
                         <div
                           style={{
                             width: "34px",
@@ -410,6 +465,7 @@ export default function Dashboard({ onOpenModal }) {
                               ? "8px 8px 0 0"
                               : "0 0 0 0",
                             transition: "height 0.3s",
+                            boxShadow: heightConverted > 0 ? "0 2px 12px rgba(0,0,0,0.22)" : "none" // subtle pop
                           }}
                         />
                       </div>
@@ -456,88 +512,114 @@ export default function Dashboard({ onOpenModal }) {
                     height: 12,
                     background: COLOR_CONVERTED,
                     borderRadius: "50%",
-                    marginRight: 4
+                    marginRight: 4,
+                    border: "1.5px solid #333"
                   }} />
                   Converted
                 </span>
               </div>
             </div>
-
-            {/* Lead Status Pie */}
+            {/* Lead Status Pie (no pop/hover/tooltips) */}
             <div style={{ background: "#fff", borderRadius: "24px", padding: "28px 28px 16px 28px" }}>
               <h2 style={{ marginBottom: "30px" }}>Lead Status</h2>
-              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                {/* ---- PIE CHART REWRITE TO KEEP SHAPE LIKE GREY ---- */}
-                <svg
-                  width="180"
-                  height="180"
-                  viewBox="0 0 180 180"
-                  style={{
-                    borderRadius: "50%",
-                    background: "#fff",
-                    position: "relative",
-                  }}
+              <div style={{ display: "flex", alignItems: "center", gap: "20px", position: "relative" }}>
+                <div
+                  style={{ position: "relative", width: 180, height: 180 }}
                 >
-                  {/* New (blue) */}
-                  <circle
-                    r="80"
-                    cx="90"
-                    cy="90"
-                    fill="transparent"
-                    stroke={COLOR_NEW}
-                    strokeWidth="30"
-                    strokeDasharray={
-                      `${(newPct / 100) * 2 * Math.PI * 80} ${(2 * Math.PI * 80) - ((newPct / 100) * 2 * Math.PI * 80)}`
-                    }
-                    strokeDashoffset="0"
-                    transform="rotate(-90 90 90)"
-                  />
-                  {/* Converted (navy) */}
-                  <circle
-                    r="80"
-                    cx="90"
-                    cy="90"
-                    fill="transparent"
-                    stroke={COLOR_CONVERTED}
-                    strokeWidth="30"
-                    strokeDasharray={
-                      `${(convertedPct / 100) * 2 * Math.PI * 80} ${(2 * Math.PI * 80) - ((convertedPct / 100) * 2 * Math.PI * 80)}`
-                    }
-                    strokeDashoffset={`${-((newPct / 100) * 2 * Math.PI * 80)}`}
-                    transform="rotate(-90 90 90)"
-                  />
-                  {/* Contacted (grey) */}
-                  <circle
-                    r="80"
-                    cx="90"
-                    cy="90"
-                    fill="transparent"
-                    stroke={COLOR_CONTACTED}
-                    strokeWidth="30"
-                    strokeDasharray={
-                      `${(contactedPct / 100) * 2 * Math.PI * 80} ${(2 * Math.PI * 80) - ((contactedPct / 100) * 2 * Math.PI * 80)}`
-                    }
-                    strokeDashoffset={`${-(((newPct + convertedPct) / 100) * 2 * Math.PI * 80)}`}
-                    transform="rotate(-90 90 90)"
-                  />
-                  {/* Center white circle */}
-                  <circle
-                    r="47.5"
-                    cx="90"
-                    cy="90"
-                    fill="#fff"
-                  />
-                </svg>
+                  <svg
+                    width="180"
+                    height="180"
+                    viewBox="0 0 180 180"
+                    style={{
+                      borderRadius: "50%",
+                      background: "#fff",
+                      position: "relative",
+                    }}
+                  >
+                    {/* New (blue) */}
+                    <circle
+                      r="80"
+                      cx="90"
+                      cy="90"
+                      fill="transparent"
+                      stroke={COLOR_NEW}
+                      strokeWidth="30"
+                      strokeDasharray={
+                        `${(newPct / 100) * 2 * Math.PI * 80} ${(2 * Math.PI * 80) - ((newPct / 100) * 2 * Math.PI * 80)}`
+                      }
+                      strokeDashoffset="0"
+                      transform="rotate(-90 90 90)"
+                      style={{
+                        transition: "filter 0.2s, stroke-width 0.2s",
+                        filter: "none",
+                        strokeWidth: 30,
+                        cursor: "pointer",
+                        zIndex: 1,
+                      }}
+                    />
+                    {/* Converted (black) */}
+                    <circle
+                      r="80"
+                      cx="90"
+                      cy="90"
+                      fill="transparent"
+                      stroke={COLOR_CONVERTED}
+                      strokeWidth="30"
+                      strokeDasharray={
+                        `${(convertedPct / 100) * 2 * Math.PI * 80} ${(2 * Math.PI * 80) - ((convertedPct / 100) * 2 * Math.PI * 80)}`
+                      }
+                      strokeDashoffset={`${-((newPct / 100) * 2 * Math.PI * 80)}`}
+                      transform="rotate(-90 90 90)"
+                      style={{
+                        transition: "filter 0.2s, stroke-width 0.2s, box-shadow 0.25s",
+                        filter: "none",
+                        strokeWidth: 30,
+                        cursor: "pointer",
+                        zIndex: 1,
+                        boxShadow: "none"
+                      }}
+                    />
+                    {/* Contacted (grey) */}
+                    <circle
+                      r="80"
+                      cx="90"
+                      cy="90"
+                      fill="transparent"
+                      stroke={COLOR_CONTACTED}
+                      strokeWidth="30"
+                      strokeDasharray={
+                        `${(contactedPct / 100) * 2 * Math.PI * 80} ${(2 * Math.PI * 80) - ((contactedPct / 100) * 2 * Math.PI * 80)}`
+                      }
+                      strokeDashoffset={`${-(((newPct + convertedPct) / 100) * 2 * Math.PI * 80)}`}
+                      transform="rotate(-90 90 90)"
+                      style={{
+                        transition: "filter 0.2s, stroke-width 0.2s",
+                        filter: "none",
+                        strokeWidth: 30,
+                        cursor: "pointer",
+                        zIndex: 1,
+                      }}
+                    />
+                    {/* Center white circle */}
+                    <circle
+                      r="47.5"
+                      cx="90"
+                      cy="90"
+                      fill="#fff"
+                    />
+                  </svg>
+                </div>
                 <div style={{ lineHeight: "2" }}>
                   <p><span style={{ color: COLOR_NEW }}>●</span> New ({newPct}%) {pieStatus.new}</p>
-                  <p><span style={{ color: COLOR_CONVERTED }}>●</span> Converted ({convertedPct}%) {pieStatus.converted}</p>
+                  <p><span style={{
+                    color: COLOR_CONVERTED,
+                    textShadow: "0 0 8px #222, 0 0 4px #222, 0 0 2px #000"
+                  }}>●</span> Converted ({convertedPct}%) {pieStatus.converted}</p>
                   <p><span style={{ color: COLOR_CONTACTED }}>●</span> Contacted ({contactedPct}%) {pieStatus.contacted}</p>
                 </div>
               </div>
             </div>
-       
           </div>
-
           {/* Recent Activity + Upcoming Events */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
             <div style={{ background: "#fff", borderRadius: "24px", padding: "28px" }}>
@@ -586,7 +668,7 @@ export default function Dashboard({ onOpenModal }) {
                           border: "1px solid #cbd5e1",
                           cursor: "pointer",
                           background: "#e0e7ef",
-                          color: "#1e293b",
+                          color: "#000", // for better visual cue on Edit of black events
                         }}
                         onClick={() => handleEditEventClick(event)}
                         title="Edit Event"
@@ -728,7 +810,7 @@ export default function Dashboard({ onOpenModal }) {
                               border: "1px solid #cbd5e1",
                               cursor: "pointer",
                               background: "#e0e7ef",
-                              color: "#1e293b",
+                              color: "#000",
                             }}
                             onClick={() => handleEditEventClick(event)}
                             title="Edit Event"
