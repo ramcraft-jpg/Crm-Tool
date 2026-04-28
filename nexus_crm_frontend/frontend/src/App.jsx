@@ -76,7 +76,33 @@ export default function App() {
 
     event: async (form) => {
       try {
-        const res = await axios.post(`${API}/events`, form, authHeader());
+        let startDate = null;
+        let endDate = null;
+        if (form.date) {
+          if (form.time && form.time.trim()) {
+            startDate = new Date(`${form.date}T${form.time}`);
+            endDate = new Date(`${form.date}T${form.time}`);
+          } else {
+            startDate = new Date(form.date);
+            endDate = null;
+          }
+        }
+
+        const payload = {
+          title: form.title,
+          description: form.desc || "",
+          location: "",
+          startDate: startDate,
+          endDate: endDate,
+          type: form.type || "Meeting",
+          attendees: form.participants
+            ? form.participants.split(",").map((p) => p.trim()).filter(Boolean)
+            : [],
+          status: "Scheduled",
+          isAllDay: false,
+        };
+
+        const res = await axios.post(`${API}/events`, payload, authHeader());
         setEvents((prev) => [res.data, ...prev]);
         showToast("Event scheduled!", "success");
         setQuickModal(null);

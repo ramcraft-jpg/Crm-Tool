@@ -1,7 +1,7 @@
 // Events.jsx
 
-import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useState, useEffect, useCallback } from "react";
+import { useAuth, API } from "../context/AuthContext";
 import EventForm from "../components/EventForm";
 import { StatusBadge } from "../components/Card";
 
@@ -75,7 +75,7 @@ export default function Events() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/events", {
+      const res = await fetch(`${API}/events`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -120,13 +120,13 @@ export default function Events() {
       ...event,
       date: event.startDate
         ? new Date(event.startDate)
-            .toISOString()
-            .split("T")[0]
+          .toISOString()
+          .split("T")[0]
         : "",
       time: event.endDate
         ? new Date(event.endDate)
-            .toISOString()
-            .slice(11, 16)
+          .toISOString()
+          .slice(11, 16)
         : "",
       participants: Array.isArray(event.attendees)
         ? event.attendees.join(", ")
@@ -137,33 +137,59 @@ export default function Events() {
     setModalOpen(true);
   };
 
-  // SAVE EVENT
+  // SAVE EVENT (with robust validation, especially for required fields)
   const handleSave = async (form) => {
     try {
+      // Validation - event title and date are required (date, NOT time)
+      if (!form.title || !form.title.trim()) {
+        showToast("Event title is required.", "danger");
+        return;
+      }
+      if (!form.date || !form.date.trim()) {
+        showToast("Event start date is required.", "danger");
+        return;
+      }
+      // Optional: you could validate format, but if a date string is present, we let the Date constructor handle parse errors.
+
+      // Fix: Make sure type is valid
       const validType =
         EVENT_TYPES.slice(1).find(
           (t) => t === form.type
         ) || "Meeting";
 
+      // Build correct start and end dates based on form values
+      let startDate = null;
+      let endDate = null;
+      if (form.date) {
+        // startDate is always present if required validation passed
+        if (form.time && form.time.trim()) {
+          // date and time
+          startDate = new Date(`${form.date}T${form.time}`);
+          endDate = new Date(`${form.date}T${form.time}`); // Set end same as start unless you have a duration field
+        } else {
+          // date only
+          startDate = new Date(form.date);
+          endDate = null;
+        }
+      }
+
+      if (!startDate || isNaN(new Date(startDate).getTime())) {
+        showToast("Event start date is invalid.", "danger");
+        return;
+      }
+
       const payload = {
-        title: form.title,
+        title: form.title.trim(),
         description: form.desc || "",
         location: "",
-        startDate: form.date
-          ? new Date(form.date)
-          : null,
-        endDate:
-          form.date && form.time
-            ? new Date(
-                `${form.date}T${form.time}`
-              )
-            : null,
+        startDate: startDate,
+        endDate: endDate,
         type: validType,
         attendees: form.participants
           ? form.participants
-              .split(",")
-              .map((p) => p.trim())
-              .filter(Boolean)
+            .split(",")
+            .map((p) => p.trim())
+            .filter(Boolean)
           : [],
         status: "Scheduled",
         isAllDay: false,
@@ -172,7 +198,7 @@ export default function Events() {
       // UPDATE
       if (editing && editing._id) {
         const updateRes = await fetch(
-          `http://localhost:5000/api/events/${editing._id}`,
+          `${API}/events/${editing._id}`,
           {
             method: "PUT",
             headers: {
@@ -183,20 +209,22 @@ export default function Events() {
           }
         );
 
+        // Await JSON/error message
         if (!updateRes.ok) {
-          throw new Error("Failed to update event");
+          let msg = "Failed to update event";
+          try {
+            const err = await updateRes.json();
+            if (err && err.message) msg = err.message;
+          } catch (e) { }
+          throw new Error(msg);
         }
 
-        showToast(
-          "Event updated successfully!",
-          "success"
-        );
+        showToast("Event updated successfully!", "success");
       }
-
       // CREATE
       else {
         const createRes = await fetch(
-          "http://localhost:5000/api/events",
+          `${API}/events`,
           {
             method: "POST",
             headers: {
@@ -207,31 +235,28 @@ export default function Events() {
           }
         );
 
+        // Await JSON/error message
         if (!createRes.ok) {
-          const err = await createRes.json();
-          throw new Error(
-            err.message || "Failed to create event"
-          );
+          let msg = "Failed to create event";
+          try {
+            const err = await createRes.json();
+            if (err && err.message) msg = err.message;
+          } catch (e) { }
+          throw new Error(msg);
         }
 
-        showToast(
-          "Event scheduled successfully!",
-          "success"
-        );
+        showToast("Event scheduled successfully!", "success");
       }
 
-      // REFRESH
+      // REFRESH EVENTS after save
       await fetchEvents();
 
       setModalOpen(false);
       setEditing(null);
     } catch (error) {
-      console.error(
-        "SAVE EVENT ERROR:",
-        error
-      );
+      console.error("SAVE EVENT ERROR:", error);
       showToast(
-        error.message || "Something went wrong!",
+        error && error.message ? error.message : "Something went wrong!",
         "danger"
       );
     }
@@ -239,15 +264,11 @@ export default function Events() {
 
   // DELETE EVENT
   const handleDelete = async (id) => {
-    if (
-      !window.confirm(
-        "Delete this event?"
-      )
-    ) return;
+    if (!window.confirm("Delete this event?")) return;
 
     try {
       await fetch(
-        `http://localhost:5000/api/events/${id}`,
+        `${API}/events/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -258,17 +279,10 @@ export default function Events() {
 
       await fetchEvents();
 
-      showToast(
-        "Event deleted successfully!",
-        "success"
-      );
+      showToast("Event deleted successfully!", "success");
     } catch (error) {
       console.error(error);
-
-      showToast(
-        "Failed to delete event",
-        "danger"
-      );
+      showToast("Failed to delete event", "danger");
     }
   };
 
@@ -358,8 +372,8 @@ export default function Events() {
                     <td>
                       {e.startDate
                         ? new Date(
-                            e.startDate
-                          ).toLocaleDateString()
+                          e.startDate
+                        ).toLocaleDateString()
                         : "—"}
 
                       {e.endDate && (

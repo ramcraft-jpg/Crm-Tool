@@ -1,9 +1,18 @@
 
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth, API } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+
+// Fallback event types if prop is empty or invalid, per requirements.
+const EVENT_TYPES_FALLBACK = [
+  "Meeting",
+  "Call",
+  "Demo",
+  "Follow up",
+  "Deadline",
+  "Other",
+];
 
 const EMPTY = {
   title: "",
@@ -23,6 +32,12 @@ export default function EventForm({
 }) {
   const { showToast } = useAuth();
   const navigate = useNavigate();
+
+  // Ensure eventTypes is a valid, non-empty array, otherwise use fallback.
+  const safeEventTypes =
+    Array.isArray(eventTypes) && eventTypes.length > 0
+      ? eventTypes
+      : EVENT_TYPES_FALLBACK;
 
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState("");
@@ -52,7 +67,11 @@ export default function EventForm({
                   .toISOString()
                   .slice(11, 16)
               : ""),
-          type: initial.type || "Meeting",
+          type:
+            // For edit, if stored type isn't in options, fallback to first available option.
+            safeEventTypes.includes(initial.type)
+              ? initial.type
+              : safeEventTypes[0],
           participants: Array.isArray(initial.attendees)
             ? initial.attendees.join(", ")
             : initial.participants || "",
@@ -69,7 +88,8 @@ export default function EventForm({
       setForm(EMPTY);
       setError("");
     }
-  }, [initial, open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initial, open, safeEventTypes]);
 
   const set = (key, value) => {
     setForm((prev) => ({
@@ -111,23 +131,17 @@ export default function EventForm({
     <div
       className="modal-overlay open"
       onClick={(e) =>
-        e.target === e.currentTarget &&
-        onClose()
+        e.target === e.currentTarget && onClose()
       }
     >
       <div className="modal">
         {/* HEADER */}
         <div className="modal-header">
           <div className="modal-title">
-            {initial
-              ? "Edit Event"
-              : "Schedule New Event"}
+            {initial ? "Edit Event" : "Schedule New Event"}
           </div>
 
-          <button
-            className="modal-close"
-            onClick={onClose}
-          >
+          <button className="modal-close" onClick={onClose}>
             ✕
           </button>
         </div>
@@ -143,9 +157,7 @@ export default function EventForm({
             <label>Event Title *</label>
             <input
               value={form.title}
-              onChange={(e) =>
-                set("title", e.target.value)
-              }
+              onChange={(e) => set("title", e.target.value)}
               placeholder="Event title"
               required
             />
@@ -157,9 +169,7 @@ export default function EventForm({
             <input
               type="date"
               value={form.date}
-              onChange={(e) =>
-                set("date", e.target.value)
-              }
+              onChange={(e) => set("date", e.target.value)}
               required
             />
           </div>
@@ -170,9 +180,7 @@ export default function EventForm({
             <input
               type="time"
               value={form.time}
-              onChange={(e) =>
-                set("time", e.target.value)
-              }
+              onChange={(e) => set("time", e.target.value)}
             />
           </div>
 
@@ -180,16 +188,14 @@ export default function EventForm({
           <div className="form-group">
             <label>Event Type</label>
             <select
-              value={form.type}
-              onChange={(e) =>
-                set("type", e.target.value)
+              value={
+                // If form.type is missing from safeEventTypes, fallback to first available
+                safeEventTypes.includes(form.type) ? form.type : safeEventTypes[0]
               }
+              onChange={(e) => set("type", e.target.value)}
             >
-              {eventTypes.map((type) => (
-                <option
-                  key={type}
-                  value={type}
-                >
+              {safeEventTypes.map((type) => (
+                <option key={type} value={type}>
                   {type}
                 </option>
               ))}
@@ -206,12 +212,9 @@ export default function EventForm({
             <input
               value={form.participants}
               onChange={(e) =>
-                set(
-                  "participants",
-                  e.target.value
-                )
+                set("participants", e.target.value)
               }
-              placeholder="John, Alex, Smith"
+              placeholder=""
             />
           </div>
 
@@ -221,9 +224,7 @@ export default function EventForm({
 
             <textarea
               value={form.desc}
-              onChange={(e) =>
-                set("desc", e.target.value)
-              }
+              onChange={(e) => set("desc", e.target.value)}
               placeholder="Event details..."
             />
           </div>
@@ -271,4 +272,3 @@ export default function EventForm({
     </div>
   );
 }
-
